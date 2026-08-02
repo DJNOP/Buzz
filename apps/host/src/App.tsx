@@ -16,6 +16,7 @@ import {
   type SignalSprintState,
 } from "@party-game/shared";
 import { EventStation } from "./EventStation";
+import { LightRigProp } from "./LightRigProp";
 import { getPlayerIdentity } from "./player-identity";
 import {
   deriveRobotPresentation,
@@ -24,6 +25,7 @@ import {
   type RobotPresentation,
 } from "./robot-presentation";
 import { ServiceRobot } from "./ServiceRobot";
+import { getLightRigProgressState } from "./sprite-assets";
 import { hostSocket, serverUrl } from "./socket";
 
 type ConnectionState = "connecting" | "connected" | "disconnected" | "error";
@@ -553,11 +555,20 @@ export const App = () => {
                     data-player={player.playerNumber}
                     data-identity-colour={identity.colour}
                   >
-                    <ServiceRobot
-                      identity={identity}
-                      presentation={presentation}
-                      compact
-                    />
+                    <div className="result-crew-visuals">
+                      <LightRigProp
+                        state={getLightRigProgressState(
+                          player.score,
+                          game.scoreToWin,
+                        )}
+                        compact
+                      />
+                      <ServiceRobot
+                        identity={identity}
+                        presentation={presentation}
+                        compact
+                      />
+                    </div>
                     <div>
                       <span>P{player.playerNumber}</span>
                       <strong>{player.displayName}</strong>

@@ -1,0 +1,89 @@
+{
+  "version": 1,
+  "generatedOn": "2026-08-02",
+  "featureFlag": "VITE_SIGNAL_SPRINT_PIXELLAB_SPRITES=false",
+  "robot": {
+    "dimensions": [96, 96],
+    "source": "prototype-service-robot-master-v1.png",
+    "method": "PixelLab MCP animate_image; exact approved master copied as selected frame 0",
+    "states": {
+      "idle": {
+        "jobId": "9783b93b-2502-422e-917b-bc893c6129de",
+        "seed": 6703,
+        "rawFrameCount": 5,
+        "selectedRawIndices": ["master", 1, 3, 4],
+        "frameDurationsMs": [260, 160, 180, 260]
+      },
+      "input-acknowledgement": {
+        "jobId": "483ea343-13ac-4846-9d9e-3d8d9a93367c",
+        "seed": 6704,
+        "rawFrameCount": 5,
+        "selectedRawIndices": ["master", 1, 3, 4],
+        "frameDurationsMs": [240, 150, 170, 300]
+      },
+      "correct": {
+        "jobId": "f70820f3-4ff3-4736-9b9f-4ad7b55b072f",
+        "seed": 6801,
+        "rawFrameCount": 5,
+        "selectedRawIndices": ["master", 1, 3, 4],
+        "frameDurationsMs": [220, 150, 180, 270]
+      },
+      "wrong": {
+        "jobId": "ec77c41a-8b08-471e-98a6-f8db3e307ce4",
+        "seed": 6802,
+        "rawFrameCount": 5,
+        "selectedRawIndices": ["master", 1, 2, 4],
+        "frameDurationsMs": [220, 160, 190, 280]
+      },
+      "stunned": {
+        "jobId": "9a04d98e-d218-4c64-a37e-11202b734031",
+        "seed": 6803,
+        "rawFrameCount": 5,
+        "selectedRawIndices": ["master", 2, 3, 4],
+        "frameDurationsMs": [220, 190, 190, 300]
+      },
+      "winning": {
+        "jobId": "b0b58202-f126-4c12-9616-0fdb2203d727",
+        "seed": 6804,
+        "rawFrameCount": 7,
+        "selectedRawIndices": ["master", 1, 2, 3, "repaired-04", 6],
+        "frameDurationsMs": [190, 130, 140, 180, 140, 280],
+        "repairJobId": "3c8a87cd-e101-443c-a088-da342dffb5ea",
+        "repairSeed": 6805,
+        "note": "Raw frames 4 and 5 introduced forbidden star eyes. Frame 4 received an eye-only PixelLab inpaint repair; raw frame 5 remains excluded."
+      }
+    }
+  },
+  "lightRig": {
+    "dimensions": [128, 96],
+    "baseJobId": "76fa1a27-8b7f-4f0d-8dbd-9393797a011e",
+    "baseSeed": 6901,
+    "structuralSourceJobId": "49b2ddba-904f-47bc-965e-0a01fbad9f0d",
+    "structuralSourceSeed": 6902,
+    "method": "PixelLab MCP create_image_pixflux, reference-preserving edit_image cleanup, then inpaint_image with one shared custom mask",
+    "states": {
+      "broken": {
+        "jobId": "84d2b143-63d4-463b-bf90-a99908f3f7c7",
+        "seed": 6920
+      },
+      "partial": {
+        "jobId": "60c43027-bddf-4760-a039-ee7ba9726679",
+        "seed": 6921
+      },
+      "nearly-operational": {
+        "jobId": "1512c420-e572-48f4-95a2-cb5c1cab42f6",
+        "seed": 6922
+      },
+      "complete": {
+        "jobId": "4d6fe3eb-88bc-4131-9443-ce8be153a62b",
+        "seed": 6923
+      }
+    },
+    "alignmentValidation": {
+      "rawAlphaBoundingBox": [14, 13, 82, 90],
+      "selectedAlphaBoundingBox": [30, 13, 98, 90],
+      "selectedTranslationPixels": [16, 0],
+      "changedPixelsOutsideSharedMask": 0
+    }
+  }
+}

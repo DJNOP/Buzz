@@ -1,15 +1,15 @@
 import type { SignalSprintPlayer } from "@party-game/shared";
 import { BUTTON_PRESENTATION } from "./button-presentation";
+import { LightRigProp } from "./LightRigProp";
 import { getPlayerIdentity } from "./player-identity";
 import type { RobotPresentation } from "./robot-presentation";
 import { ServiceRobot } from "./ServiceRobot";
+import { getLightRigProgressState } from "./sprite-assets";
 
-const STATIONS = [
-  { name: "Light rig", task: "Patch the stage lights", icon: "lights" },
-  { name: "Sound desk", task: "Balance the speaker stacks", icon: "sound" },
-  { name: "Decor bay", task: "Dress the celebration arch", icon: "decor" },
-  { name: "Supply dock", task: "Route the event crates", icon: "supply" },
-] as const;
+const LIGHT_RIG_STATION = {
+  name: "Light rig",
+  task: "Patch the stage lights",
+} as const;
 
 export const EventStation = ({
   player,
@@ -22,8 +22,10 @@ export const EventStation = ({
 }) => {
   const identity = getPlayerIdentity(player.playerNumber);
   const target = BUTTON_PRESENTATION[player.target];
-  const station = STATIONS[player.playerNumber - 1] ?? STATIONS[0];
-  const progress = Math.min(100, (player.score / scoreToWin) * 100);
+  const station = LIGHT_RIG_STATION;
+  const progress =
+    scoreToWin > 0 ? Math.min(100, (player.score / scoreToWin) * 100) : 0;
+  const stationState = getLightRigProgressState(player.score, scoreToWin);
 
   return (
     <article
@@ -31,6 +33,7 @@ export const EventStation = ({
       data-player={identity.number}
       data-identity-colour={identity.colour}
       data-robot-state={presentation.state}
+      data-station-state={stationState}
     >
       <header className="station-header">
         <span className={`identity-chip identity-chip--${identity.shape}`}>
@@ -46,9 +49,7 @@ export const EventStation = ({
       </header>
 
       <div className="station-workspace">
-        <div className={`station-prop station-prop--${station.icon}`} aria-hidden="true">
-          <span /><span /><span />
-        </div>
+        <LightRigProp state={stationState} />
         <ServiceRobot identity={identity} presentation={presentation} />
         <div
           className="signal-console"

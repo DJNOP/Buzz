@@ -1,30 +1,13 @@
+import { useEffect, useState } from "react";
 import type { PlayerIdentity } from "./player-identity";
 import type { RobotPresentation } from "./robot-presentation";
+import {
+  PIXELLAB_SPRITE_PRESENTATION_ENABLED,
+  ROBOT_SPRITE_ASSETS,
+} from "./sprite-assets";
 
-export const ServiceRobot = ({
-  identity,
-  presentation,
-  compact = false,
-}: {
-  identity: PlayerIdentity;
-  presentation: RobotPresentation;
-  compact?: boolean;
-}) => (
-  <div
-    className={`service-robot ${compact ? "service-robot--compact" : ""}`}
-    data-player={identity.number}
-    data-identity-colour={identity.colour}
-    data-state={presentation.state}
-    role="img"
-    aria-label={`Player ${identity.number} ${identity.colourLabel} ${identity.shapeLabel} service robot: ${presentation.label}`}
-  >
-    {presentation.showAcknowledgement ? (
-      <span
-        key={presentation.acknowledgementSequence}
-        className="robot-acknowledgement"
-        aria-hidden="true"
-      />
-    ) : null}
+const CssRobotVisual = ({ identity }: { identity: PlayerIdentity }) => (
+  <>
     <div className="robot-antenna" aria-hidden="true">
       <i />
     </div>
@@ -49,6 +32,70 @@ export const ServiceRobot = ({
     <div className="robot-feet" aria-hidden="true">
       <i /><i />
     </div>
-    <span className="robot-state-label">{presentation.label}</span>
-  </div>
+  </>
 );
+
+export const ServiceRobot = ({
+  identity,
+  presentation,
+  compact = false,
+}: {
+  identity: PlayerIdentity;
+  presentation: RobotPresentation;
+  compact?: boolean;
+}) => {
+  const spriteAsset = PIXELLAB_SPRITE_PRESENTATION_ENABLED
+    ? ROBOT_SPRITE_ASSETS[presentation.state]
+    : undefined;
+  const [spriteFailed, setSpriteFailed] = useState(false);
+
+  useEffect(() => {
+    setSpriteFailed(false);
+  }, [spriteAsset?.animationUrl]);
+
+  const showSprite = Boolean(spriteAsset && !spriteFailed);
+  const animationKey = `${presentation.state}-${presentation.acknowledgementSequence ?? 0}`;
+
+  return (
+    <div
+      className={`service-robot ${compact ? "service-robot--compact" : ""} ${showSprite ? "service-robot--sprite" : ""}`}
+      data-player={identity.number}
+      data-identity-colour={identity.colour}
+      data-state={presentation.state}
+      data-visual-source={showSprite ? "pixellab" : "css-fallback"}
+      role="img"
+      aria-label={`Player ${identity.number} ${identity.colourLabel} ${identity.shapeLabel} service robot: ${presentation.label}`}
+    >
+      {presentation.showAcknowledgement ? (
+        <span
+          key={presentation.acknowledgementSequence}
+          className="robot-acknowledgement"
+          aria-hidden="true"
+        />
+      ) : null}
+      {showSprite && spriteAsset ? (
+        <div className="robot-sprite-stage" aria-hidden="true">
+          <picture className="robot-sprite-picture">
+            <source
+              media="(prefers-reduced-motion: reduce)"
+              srcSet={spriteAsset.posterUrl}
+            />
+            <img
+              key={animationKey}
+              src={spriteAsset.animationUrl}
+              alt=""
+              draggable={false}
+              onError={() => setSpriteFailed(true)}
+            />
+          </picture>
+          <span
+            className={`robot-sprite-identity identity-mark--${identity.shape}`}
+          />
+        </div>
+      ) : (
+        <CssRobotVisual identity={identity} />
+      )}
+      <span className="robot-state-label">{presentation.label}</span>
+    </div>
+  );
+};
