@@ -174,3 +174,28 @@ generations, unselected frames, duplicate exports, or disposable review work.
 This proof demonstrates a production workflow only. It does not approve the
 assets as final commercial art, resolve licensing or accessibility, authorize
 additional generated states, or select PixelLab as a permanent art pipeline.
+
+## D-014 — Provisional shared-venue composition
+
+- **Date:** 2026-08-03
+- **Status:** Provisional, implemented for composition validation
+
+Compose active Signal Sprint play as one responsive 16:9 backstage venue with a
+central stage, continuous floor, shared truss, original CSS/SVG scenery, and
+one open foreground workstation per authoritative participant. Put each
+independent semantic target inside that player's equipment desk and keep fixed
+player colour/shape identity separate from target tone. One-player play renders
+no empty station placeholders; two, three, and four players remain equal members
+of the same venue.
+
+Temporarily map every player to one individually labelled segment of the shared
+lighting system, using the approved four PixelLab rig states and existing score
+thresholds. Segment beams may affect the same stage, but each player's state and
+numeric progress must remain independently readable. This is a composition
+proof, not approval of four identical final tasks, the current robot/station
+art, or the venue as production art.
+
+Keep the composition in focused React components and CSS/SVG. Do not introduce
+a canvas or game engine, and do not move presentation concepts into the server,
+shared protocol, controller, or Signal Sprint rules. Physical social playtesting
+at normal television distance remains the next product gate.

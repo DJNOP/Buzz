@@ -27,10 +27,13 @@ Roadmap Milestones 1–7 and a provisional themed presentation slice are impleme
   the time limit, including explicit joint winners for ties.
 - Players retain round state through temporary reconnection, late joiners wait
   for the next round, and expired participants become inactive for that round.
-- Signal Sprint now takes place in an original temporary Event Rescue venue.
-  A reversible PixelLab prototype path supplies one approved neutral robot and
-  one four-state light rig per station; P1 is red/circle, P2 blue/square, P3
-  yellow/triangle, and P4 green/diamond.
+- Signal Sprint now takes place in one connected temporary Event Rescue venue.
+  A reversible PixelLab prototype path supplies one approved neutral robot per
+  player and four-state light-rig segments mounted on one shared stage truss;
+  P1 is red/circle, P2 blue/square, P3 yellow/triangle, and P4 green/diamond.
+- One to four active workstations scale across the foreground without empty
+  placeholders. Each robot operates a desk-mounted independent cue while the
+  corresponding lighting segment visibly changes the central stage.
 - The repository-owned CSS robot and station remain the intentional
   working/losing and image-load fallback. Set
   `VITE_SIGNAL_SPRINT_PIXELLAB_SPRITES=false` at build or dev startup to use
@@ -45,9 +48,10 @@ Signal Sprint and its Event Rescue world are provisional prototype content used
 to validate the shared-screen gameplay loop. They are not final branding,
 production artwork, or an approved production minigame. The PixelLab files are
 an internal production-pipeline proof with recorded provenance, not cleared
-commercial art. The project still contains no tournament flow, audio production,
-game engine, progression, matchmaking, accounts, database, deployment, or cloud
-service.
+commercial art. Giving every player one lighting-system segment is a temporary
+presentation proof; final distinct crew tasks remain unresolved. The project
+still contains no tournament flow, audio production, game engine, progression,
+matchmaking, accounts, database, deployment, or cloud service.
 
 ## Repository layout
 
@@ -174,8 +178,10 @@ Screen Wake Lock remains deferred. Keep phone screens awake manually during long
    room-code joining at least once.
 3. Start Signal Sprint and confirm every player sees the same 3, 2, 1 countdown
    on the television while phones show only **Get ready**.
-4. Confirm each station has the correct player name/number, colour/shape robot
-   identity, readable cue, job score, operational meter, and misroute count.
+4. Confirm each foreground workstation has the correct player name/number,
+   colour/shape robot identity, desk-mounted readable cue, job score,
+   operational meter, and misroute count, and that its matching lighting segment
+   is identifiable on the shared truss.
 5. Press each player's matching button and confirm exactly one job, one meter
    step, a changed cue, visible acknowledgement, and no target disclosure on
    the phone.

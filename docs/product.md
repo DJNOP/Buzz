@@ -73,9 +73,17 @@ Early prototypes should validate the controller-to-host loop before expanding sc
 ## Provisional Event Rescue slice
 
 Signal Sprint currently stages the validation loop as an original event venue
-being prepared by four identical temporary service robots. Player identity is
+being prepared by four identical temporary service robots. The active host now
+composes the central stage, continuous floor, truss, equipment, robots, and
+foreground workstations as one connected physical space. Player identity is
 redundant by colour and shape: red/circle, blue/square, yellow/triangle, and
-green/diamond. The robots, venue, station tasks, labels, and CSS/SVG styling are
-temporary test content. A physical playtest must determine whether this world
-improves shared-screen clarity and appeal before any final character, theme,
-brand, or art-production decision.
+green/diamond; target colour remains a separate desk-display cue.
+
+Every player temporarily repairs one individually labelled segment of the same
+lighting system so authoritative score progress can visibly affect the shared
+stage without implying that every crew has completed. This is a presentation
+proof, not the final four-task design. Distinct player jobs, the robot and
+station art, venue scenery, labels, and CSS/SVG composition all remain
+provisional. A physical social playtest must determine whether this world is
+clear, appealing, and fun before any final character, task, theme, brand, or
+art-production decision.

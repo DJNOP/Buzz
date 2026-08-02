@@ -1,24 +1,24 @@
 # Project Status
 
-- **Current phase:** Themed Signal Sprint vertical-slice validation
+- **Current phase:** Shared-venue Signal Sprint presentation validation
 - **Current milestone:** Roadmap Milestones 1–7 plus the provisional themed
-  presentation slice implemented
-- **Last completed task:** Cleaned the committed PixelLab proof for merge review:
-  retained only runtime derivatives, approved sources, complete provenance, and
-  three representative QA captures; removed rejected, unselected, redundant,
-  and duplicate review artifacts.
-- **Next recommended task:** Human-review the robot motion, light-rig progression,
-  results presentation, and the visible scale mismatch when the intentionally
-  CSS-only `working`/`losing` states are shown. Do not generate additional art or
-  merge this branch without explicit approval.
-- **Date last updated:** 2026-08-02
+  shared-venue composition implemented
+- **Last completed task:** Replaced isolated diagnostic lanes with one responsive
+  backstage venue, larger integrated workstations, independent desk-mounted
+  cues, per-player shared-truss lighting segments, a venue countdown, and a
+  populated venue results presentation without changing game behaviour.
+- **Next recommended task:** Run the documented physical social playtest with two
+  to four phones and a television. Review shared-stage readability, robot motion,
+  task clarity, target/identity separation, results, and the known CSS-only
+  `working`/`losing` art mismatch before approving more art or merging.
+- **Date last updated:** 2026-08-03
 
 ## Validation summary
 
 The local-network room, five-button input, reconnection, QR-prefill, manual
 join, and Signal Sprint rule foundations remain intact. Strict type checking
-passes for every workspace. The suite now contains 74 passing automated tests:
-5 controller presentation/input tests, 9 host identity/presentation tests, 52
+passes for every workspace. The suite now contains 86 passing automated tests:
+5 controller presentation/input tests, 21 host identity/presentation tests, 52
 unchanged server tests, and 8 shared-protocol/query tests.
 
 The production build and live multiplayer smoke scenario pass. The smoke still
@@ -40,13 +40,17 @@ and sprite sheets live with runtime assets; durable sources and the consolidated
 audit record live in `docs/art-provenance/pixellab/`. Disposable PixelLab work is
 narrowly ignored at `temp/pixellab/`.
 
-In-app browser QA covered the new generated-asset path in a real 1920x1080 room:
-idle, correct, wrong, stunned, working CSS fallback, winning, all four light-rig
-progress mappings, score transitions at 0/1/10/15, results, and replay. Generated
-states reported the PixelLab source, console logs were clean, and the complete
-rig remained visible after the immediate score-15 results transition. The host
-has no document overflow at exact 1280×720 or exact 1920×1080 viewport
-measurements.
+In-app browser QA covered one-, two-, and four-player shared-venue layouts at
+exact 1280×720 and 1920×1080, plus wrong/stunned feedback, independent partial
+progress, a score-15 complete segment, and results. Every measured view had zero
+document overflow and no clipped workstation, cue, or robot bounds. Computed
+identity accents remained red, blue, yellow, and green while targets retained
+their independent semantic tone. Direct host console logs were free of warnings
+and errors.
+
+The generated-asset path still covers idle, correct, wrong, stunned, working CSS
+fallback, winning, and all four light-rig mappings. The complete rig remained
+visible after the immediate score-15 results transition.
 Controller content has no document overflow at exact 390×844, 360×800, or
 390×667 measurements and keeps the complete A plus 1–4 stack visible in active,
 stunned, lobby, and results states. Direct host and controller consoles were
@@ -58,12 +62,21 @@ Signal Sprint keeps the existing focused `SignalSprintGame` and protocol. No
 server, shared-protocol, scoring, target, timing, tie, lifecycle, replay, or room
 isolation code changed in this slice.
 
-The host now renders a layered original CSS venue with one PixelLab-backed light
-rig and one approved PixelLab service-robot master per participant. Identity is
-redundant and fixed by player number: P1 red/circle, P2 blue/square, P3
-yellow/triangle, and P4 green/diamond. Signal targets remain separate console
-cues. The reusable robot exposes idle, input acknowledgement, correct, wrong,
-stunned, working, winning, and losing presentation states.
+The host now renders one layered original CSS/SVG backstage venue with a central
+stage, continuous floor, equipment, cables, curtains, and one shared truss. Each
+participant receives one approved PixelLab service-robot master, a larger open
+foreground workstation, an integrated semantic target display, and an
+individually labelled PixelLab-backed lighting segment. Identity remains fixed
+by player number: P1 red/circle, P2 blue/square, P3 yellow/triangle, and P4
+green/diamond. The reusable robot still exposes idle, input acknowledgement,
+correct, wrong, stunned, working, winning, and losing presentation states.
+
+`SharedVenue` composes `VenueStage`, `VenueLightingProgress`, and only the
+authoritative participants' `PlayerWorkstation` components. One player occupies
+most of the foreground, two use equal connected bays, three use three equal
+columns, and four remain readable in one row at 1280×720. Countdown and results
+reuse the same venue; winners receive prominent robots while every player keeps
+jobs, mistakes, identity, and winning/losing state in the secondary scoreboard.
 
 A small pure host presentation module consumes trusted server-received down
 events for acknowledgement and authoritative game snapshots for correct,
@@ -76,9 +89,10 @@ robot chest rather than baking player variants into generated art.
 
 Robot `idle`, input acknowledgement, correct, wrong, stunned, and winning use
 animated PNGs. Working and losing intentionally use the preserved CSS robot;
-image load errors also fall back to CSS. Every lane uses the same light-rig
-design, with score-driven broken, partial, nearly operational, and complete
-states. `VITE_SIGNAL_SPRINT_PIXELLAB_SPRITES=false` disables generated assets.
+image load errors also fall back to CSS. Every player temporarily owns one
+segment of the same lighting-system design, with score-driven broken, partial,
+nearly operational, and complete states visibly affecting the shared stage.
+`VITE_SIGNAL_SPRINT_PIXELLAB_SPRITES=false` disables generated assets.
 
 The joined controller is now one large round A action above four full-width
 controls in fixed order: 1 RED, 2 BLUE, 3 YELLOW, and 4 GREEN. The underlying
@@ -88,12 +102,14 @@ are unchanged.
 
 ## Remaining risks and manual validation
 
-The Event Rescue world, service robots, button presentation, and Signal Sprint
-content are still provisional validation material rather than final branding or
-production art. CSS/SVG presentation and browser measurements do not establish
-fun, social clarity, viewing comfort on a real television, controller comfort,
-accessibility with real players, perceived latency with four phones, or a desire
-for another round.
+The Event Rescue world, service robots, workstations, lighting segments, button
+presentation, and Signal Sprint content are still provisional validation
+material rather than final branding or production art. Giving every player a
+lighting-system segment is a temporary presentation proof; distinct final player
+tasks remain unresolved. CSS/SVG presentation and browser measurements do not
+establish fun, social clarity, viewing comfort on a real television, controller
+comfort, accessibility with real players, perceived latency with four phones, or
+a desire for another round.
 
 The approved source and generation record remain reviewable under
 `docs/art-provenance/pixellab/`; the supplied design reference remains under

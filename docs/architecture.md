@@ -10,9 +10,9 @@ unvalidated.
 
 ## Workspace boundaries
 
-1. **Host (`apps/host`)** — React/Vite QR lobby plus the shared countdown,
-   event stations, reusable service robots, targets, timing,
-   presentation-state feedback, and results screen.
+1. **Host (`apps/host`)** — React/Vite QR lobby plus the shared venue,
+   countdown overlay, reusable service robots, player workstations, independent
+   targets, venue-lighting progress, timing, feedback, and results screen.
 2. **Controller (`apps/controller`)** — React/Vite QR/manual join, private
    reconnection storage, vertical fixed five-button input, and minimal round
    status.
@@ -130,10 +130,18 @@ only and directs attention to the shared display. All targets and gameplay
 instructions that matter moment to moment remain on the host.
 
 The host uses React plus CSS/HTML geometry for the venue, targets, operational
-meters, feedback, and results. An isolated, reversible presentation path loads
-approved PixelLab prototype robot and light-rig PNGs from the host public asset
-tree. The original CSS/HTML robot and station remain available as intentional
-state and image-load fallbacks. There is no canvas engine or audio.
+meters, feedback, and results. `SharedVenue` composes `VenueStage`,
+`VenueLightingProgress`, and one `PlayerWorkstation` per authoritative
+participant. `StationTargetDisplay` keeps each semantic cue inside that
+player's equipment console. The same stage is reused behind countdown and
+results presentation, so those phases remain spatially continuous without
+becoming game-rule concepts.
+
+An isolated, reversible presentation path loads approved PixelLab prototype
+robot and light-rig PNGs from the host public asset tree. The original CSS/HTML
+robot and light rig remain intentional state and image-load fallbacks. No
+canvas, scene graph, animation framework, game engine, WebGL, 3D, or audio was
+introduced.
 
 ## Themed frontend presentation slice
 
@@ -143,11 +151,14 @@ not know about robots, stations, identity shapes, or animation states.
 
 The host's `player-identity` module fixes the temporary redundant identities:
 P1 red/circle, P2 blue/square, P3 yellow/triangle, and P4 green/diamond.
-`ServiceRobot` supplies one reusable neutral robot body, while `EventStation`
-combines it with a station prop, a separately styled target console, score,
-operational meter, and misroute count. The current proof can display selected
-PixelLab sprites without baking player identity into them; the existing player
-colour and shape remain separate overlays.
+`ServiceRobot` supplies one reusable neutral robot body, while
+`PlayerWorkstation` combines it with an equipment desk, integrated target
+display, score, operational meter, status, and misroute count. Workstations are
+open foreground set pieces rather than bordered lanes. One-, two-, three-, and
+four-player layouts render only participating workstations and scale them as an
+equal group over the same continuous floor. The current proof can display
+selected PixelLab sprites without baking player identity into them; the existing
+player colour and shape remain separate overlays.
 
 The pure `robot-presentation` module derives one of `idle`,
 `inputAcknowledgement`, `correct`, `wrong`, `stunned`, `working`, `winning`, or
@@ -158,6 +169,13 @@ host game snapshots. Short time-derived windows and sequence-keyed pulses make
 rapid events deterministic and prevent stale animation state after time or
 reconnection. Text labels and non-motion styling carry the same state under
 `prefers-reduced-motion`.
+
+`VenueLightingProgress` maps every participant independently through the same
+broken, partial, nearly operational, and complete thresholds and mounts those
+segments along one shared truss. The physical beam and central-stage response
+make progress primary; numeric jobs and meters remain secondary. All players
+using lighting segments is an explicitly temporary proof until distinct crew
+tasks are designed and playtested.
 
 `sprite-assets.ts` is the only runtime asset map. Idle, input acknowledgement,
 correct, wrong, stunned, and winning map to animated 96x96 PNGs with selected

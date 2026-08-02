@@ -15,8 +15,7 @@ import {
   type RoomSnapshot,
   type SignalSprintState,
 } from "@party-game/shared";
-import { EventStation } from "./EventStation";
-import { LightRigProp } from "./LightRigProp";
+import { CountdownVenue } from "./CountdownVenue";
 import { getPlayerIdentity } from "./player-identity";
 import {
   deriveRobotPresentation,
@@ -25,17 +24,11 @@ import {
   type RobotPresentation,
 } from "./robot-presentation";
 import { ServiceRobot } from "./ServiceRobot";
-import { getLightRigProgressState } from "./sprite-assets";
+import { SharedVenue } from "./SharedVenue";
+import { SignalSprintResults } from "./SignalSprintResults";
 import { hostSocket, serverUrl } from "./socket";
 
 type ConnectionState = "connecting" | "connected" | "disconnected" | "error";
-
-const COUNTDOWN_ROBOT_PRESENTATION: RobotPresentation = {
-  state: "idle",
-  label: "Ready for call time",
-  acknowledgementSequence: null,
-  showAcknowledgement: false,
-};
 
 const copyText = async (value: string) => {
   if (navigator.clipboard?.writeText) {
@@ -456,35 +449,11 @@ export const App = () => {
           </section>
         </div>
       ) : phase === "countdown" && game ? (
-        <section className="countdown-stage">
-          <p>Venue doors open // Round {game.roundId}</p>
-          <strong className="countdown-number">
-            {Math.max(1, Math.ceil(((game.countdownEndsAt ?? clock) - clock) / 1_000))}
-          </strong>
-          <h2>Crews to stations</h2>
-          <div className="countdown-players">
-            {game.players.map((player) => {
-              const identity = getPlayerIdentity(player.playerNumber);
-              return (
-                <div
-                  key={player.playerId}
-                  data-player={player.playerNumber}
-                  data-identity-colour={identity.colour}
-                >
-                  <ServiceRobot
-                    identity={identity}
-                    presentation={COUNTDOWN_ROBOT_PRESENTATION}
-                    compact
-                  />
-                  <span>P{player.playerNumber} {player.displayName}</span>
-                </div>
-              );
-            })}
-          </div>
-          {waitingPlayers.length > 0 ? (
-            <p>{waitingPlayers.map((player) => player.displayName).join(", ")} will join next round.</p>
-          ) : null}
-        </section>
+        <CountdownVenue
+          game={game}
+          clock={clock}
+          waitingNames={waitingPlayers.map((player) => player.displayName)}
+        />
       ) : phase === "playing" && game ? (
         <section className="play-stage">
           <div className="round-bar">
@@ -497,25 +466,19 @@ export const App = () => {
               <span>seconds</span>
             </div>
           </div>
-          <div className="event-stations" data-player-count={game.players.length}>
-            {game.players.map((player) => {
-              const presentation = deriveRobotPresentation({
+          <SharedVenue
+            players={game.players}
+            scoreToWin={game.scoreToWin}
+            getPresentation={(player) =>
+              deriveRobotPresentation({
                 phase: game.phase,
                 player,
                 winnerPlayerIds: game.winnerPlayerIds,
                 acknowledgement: robotAcknowledgements[player.playerId],
                 now: clock,
-              });
-              return (
-                <EventStation
-                  key={player.playerId}
-                  player={player}
-                  scoreToWin={game.scoreToWin}
-                  presentation={presentation}
-                />
-              );
-            })}
-          </div>
+              })
+            }
+          />
           {waitingPlayers.length > 0 ? (
             <div className="waiting-strip">
               Waiting for next round: {waitingPlayers.map((player) => player.displayName).join(", ")}
@@ -523,86 +486,25 @@ export const App = () => {
           ) : null}
         </section>
       ) : game ? (
-        <section className="results-stage">
-          <p className="section-kicker">Event report // Round {game.roundId}</p>
-          <h2>
-            {game.winnerPlayerIds.length > 1 ? "Joint rescue crew" : "Venue rescued"}
-          </h2>
-          <div className="winner-names">
-            {game.players
-              .filter((player) => game.winnerPlayerIds.includes(player.playerId))
-              .map((player) => player.displayName)
-              .join(" + ")}
-          </div>
-          <div className="results-grid">
-            {[...game.players]
-              .sort(
-                (left, right) =>
-                  right.score - left.score || left.playerNumber - right.playerNumber,
-              )
-              .map((player) => {
-                const identity = getPlayerIdentity(player.playerNumber);
-                const presentation = deriveRobotPresentation({
-                  phase: game.phase,
-                  player,
-                  winnerPlayerIds: game.winnerPlayerIds,
-                  acknowledgement: robotAcknowledgements[player.playerId],
-                  now: clock,
-                });
-                return (
-                  <article
-                    key={player.playerId}
-                    data-player={player.playerNumber}
-                    data-identity-colour={identity.colour}
-                  >
-                    <div className="result-crew-visuals">
-                      <LightRigProp
-                        state={getLightRigProgressState(
-                          player.score,
-                          game.scoreToWin,
-                        )}
-                        compact
-                      />
-                      <ServiceRobot
-                        identity={identity}
-                        presentation={presentation}
-                        compact
-                      />
-                    </div>
-                    <div>
-                      <span>P{player.playerNumber}</span>
-                      <strong>{player.displayName}</strong>
-                      <b>{player.score} jobs</b>
-                      <small>{player.mistakes} misroutes</small>
-                    </div>
-                  </article>
-                );
-              })}
-          </div>
-          <div className="results-actions">
-            <button
-              type="button"
-              onClick={() => controlGame("replay")}
-              disabled={Boolean(pendingAction) || connectedPlayers.length === 0}
-            >
-              {pendingAction === "replay" ? "Starting..." : "Play again"}
-            </button>
-            <button
-              type="button"
-              className="button-secondary"
-              onClick={() => controlGame("return_to_lobby")}
-              disabled={Boolean(pendingAction)}
-            >
-              Return to lobby
-            </button>
-          </div>
-          {waitingPlayers.length > 0 ? (
-            <p className="results-waiting">
-              Next round also includes {waitingPlayers.map((player) => player.displayName).join(", ")}.
-            </p>
-          ) : null}
-          {gameError ? <p className="error-message">{gameError}</p> : null}
-        </section>
+        <SignalSprintResults
+          game={game}
+          getPresentation={(player) =>
+            deriveRobotPresentation({
+              phase: game.phase,
+              player,
+              winnerPlayerIds: game.winnerPlayerIds,
+              acknowledgement: robotAcknowledgements[player.playerId],
+              now: clock,
+            })
+          }
+          replayDisabled={Boolean(pendingAction) || connectedPlayers.length === 0}
+          pendingReplay={pendingAction === "replay"}
+          actionsDisabled={Boolean(pendingAction)}
+          onReplay={() => controlGame("replay")}
+          onReturnToLobby={() => controlGame("return_to_lobby")}
+          waitingNames={waitingPlayers.map((player) => player.displayName)}
+          error={gameError}
+        />
       ) : null}
 
       <footer className="host-footer">

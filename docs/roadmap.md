@@ -32,9 +32,11 @@ The roadmap is deliberately sequential. Complete and evaluate each milestone bef
   30-second race, five-button targets, scoring, stuns, results, replay,
   reconnection-aware participation, and room isolation. Its first provisional
   themed vertical slice adds an original Event Rescue venue, reusable service
-  robots and stations, explicit presentation states, and a vertical phone
-  controller without changing game rules or introducing external assets, an
-  engine, or a general minigame framework.
+  robots, a responsive shared-stage composition, integrated foreground
+  workstations, independent lighting segments, explicit presentation states,
+  and a vertical phone controller without changing game rules or introducing a
+  game engine or a general minigame framework. The shared venue and temporary
+  all-lighting task model remain provisional presentation evidence.
 
 The next gate is Milestone 8: run the documented physical two-to-four-player
 Signal Sprint playtest. Technical correctness does not establish enjoyment,
