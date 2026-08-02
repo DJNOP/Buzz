@@ -34,7 +34,10 @@ Temporary external assets require documented sources and licences. AI-generated 
 
 Use TypeScript throughout the initial web system, React with Vite for both the shared host and phone-controller interfaces, Node.js with Socket.IO for real-time communication, and shared TypeScript definitions for the communication protocol.
 
-The stack passed the first real-phone local-network input test and has now supported the multiplayer room foundation. It remains provisional until a playable-minigame milestone reveals the rendering and game-logic requirements.
+The stack passed real-phone local-network input and joining tests and now
+supports multiplayer rooms plus one primitive playable minigame. React/CSS is
+sufficient for the current geometric host presentation, while game rules remain
+separate from React and Socket.IO transport.
 
 ## D-005 — Prototype operational scope
 
@@ -50,7 +53,11 @@ Browser-based phone controllers and a desktop-browser host are the chosen protot
 - **Date:** 2026-08-02
 - **Status:** Provisional
 
-Do not introduce a dedicated game engine until controller-to-host communication has been validated. The first primitive minigame can use simple shapes. Engine selection depends on evidence from the input loop and first playtest.
+Do not introduce a dedicated game engine until controller-to-host communication
+and primitive gameplay have been validated. Signal Sprint uses React and CSS
+geometric shapes successfully at this technical stage. Engine selection remains
+deferred until physical playtest evidence demonstrates a rendering, animation,
+content-production, or platform need.
 
 ## D-007 — Preserve host portability
 
@@ -93,3 +100,30 @@ Generate controller QR codes entirely in the host browser with `qrcode.react` 4.
 The QR value contains only an HTTP controller URL, selected local IPv4 address, fixed development controller port, and room code. It never includes the private reconnection token. Manual code entry remains a first-class fallback, and the server continues to validate all room joins.
 
 Discover candidate IPv4 addresses in the Node.js server rather than attempting unreliable browser discovery. Exclude internal and unusable entries, prefer common private ranges deterministically, return alternatives to the host, and allow manual user selection when several candidates exist. Do not classify adapters by brittle Wi-Fi/Ethernet/VPN name matching or alter network/firewall settings. This is provisional local-development infrastructure, not internet routing or production service discovery.
+
+## D-011 — Focused server-authoritative Signal Sprint prototype
+
+- **Date:** 2026-08-02
+- **Status:** Provisional, implemented for Milestone 7
+
+Build the first gameplay proof as one focused `SignalSprintGame` module per room,
+not as a generic minigame engine, plugin system, or new framework. `RoomManager`
+continues to own membership, trusted player/socket identity, reconnection,
+expiry, and paired input. Signal Sprint separately owns only phase, round ID,
+captured participants, targets, scores, mistakes, stuns, deadlines, and winners.
+
+Use injected clock, scheduler, cancellation, and random sources to make all
+rules deterministic under fake timers. Production rules use a three-second
+countdown, 30-second round, 600 ms stun, and first-to-15 early finish. Timeout
+ties remain joint wins; do not introduce a hidden tie-breaker.
+
+Send full game state only to the owning host. Controllers receive minimal
+participation/status feedback and never receive the current target, score, or
+winners. Host actions contain no room or player authority; the server derives
+the room from the validated host-role socket. Replay and return-to-lobby preserve
+the existing room and controllers.
+
+Signal Sprint's title, exact rules, symbols, colours, and presentation are
+prototype evidence rather than approved production content. Add no engine,
+art/audio asset, persistence, tournament flow, or additional minigame until the
+physical enjoyment playtest justifies another investment.

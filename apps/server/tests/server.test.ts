@@ -5,19 +5,25 @@ import { io as createClient, type Socket as ClientSocket } from "socket.io-clien
 import type { Server as SocketServer } from "socket.io";
 import {
   CONNECTION_ROLES,
+  CONTROLLER_GAME_STATUS_EVENT,
   CONTROLLER_INPUT_EVENT,
   CONTROLLER_JOIN_ROOM_EVENT,
   CONTROLLER_RECONNECT_EVENT,
   CONTROLLER_ROOM_CLOSED_EVENT,
   HOST_CREATE_ROOM_EVENT,
+  HOST_GAME_ACTION_EVENT,
+  HOST_GAME_STATE_EVENT,
   HOST_GET_NETWORK_ADDRESSES_EVENT,
   HOST_PLAYER_INPUT_EVENT,
   HOST_ROOM_STATE_EVENT,
   type ClientToServerEvents,
   type ConnectionRole,
   type ControllerSession,
+  type ControllerGameStatus,
   type CreateRoomResult,
   type HostPlayerInputEvent,
+  type HostGameAction,
+  type HostGameActionResult,
   type InterServerEvents,
   type JoinRoomResult,
   type HostNetworkAddressesResult,
@@ -25,11 +31,13 @@ import {
   type ReconnectControllerResult,
   type RoomClosedNotice,
   type RoomSnapshot,
+  type SignalSprintState,
   type ServerToClientEvents,
   type SocketData,
 } from "@party-game/shared";
 import { createRealtimeServer } from "../src/create-server.js";
 import { RoomManager } from "../src/room-manager.js";
+import { SignalSprintGame } from "../src/signal-sprint-game.js";
 
 type TypedClient = ClientSocket<ServerToClientEvents, ClientToServerEvents>;
 type TypedServer = SocketServer<
@@ -42,6 +50,8 @@ type TypedServer = SocketServer<
 interface RunningServer {
   io: TypedServer;
   roomManager: RoomManager;
+  signalSprintGames: SignalSprintGame[];
+  dispose: () => void;
   url: string;
 }
 
@@ -60,12 +70,22 @@ const startServer = async (
     createPlayerId: () => `player-${(playerSequence += 1)}`,
     createReconnectionToken: () =>
       `private-reconnect-token-${(tokenSequence += 1).toString().padStart(4, "0")}`,
-    reconnectGraceMs: 5_000,
+    reconnectGraceMs: 120,
   });
   const httpServer = createServer();
-  const { io } = createRealtimeServer(httpServer, {
+  const signalSprintGames: SignalSprintGame[] = [];
+  const { io, dispose } = createRealtimeServer(httpServer, {
     roomManager,
     getNetworkAddresses: () => networkAddresses,
+    createSignalSprintGame: (roomCode) => {
+      const game = new SignalSprintGame(roomCode, {
+        countdownMs: 25,
+        roundMs: 2_000,
+        stunMs: 60,
+      });
+      signalSprintGames.push(game);
+      return game;
+    },
   });
 
   await new Promise<void>((resolve, reject) => {
@@ -81,6 +101,8 @@ const startServer = async (
   runningServer = {
     io,
     roomManager,
+    signalSprintGames,
+    dispose,
     url: `http://127.0.0.1:${(address as AddressInfo).port}`,
   };
   return runningServer;
@@ -121,17 +143,46 @@ const reconnect = (client: TypedClient, reconnectionToken: string) =>
     client.emit(CONTROLLER_RECONNECT_EVENT, { reconnectionToken }, resolve),
   );
 
+const gameAction = (client: TypedClient, action: HostGameAction) =>
+  new Promise<HostGameActionResult>((resolve) =>
+    client.emit(HOST_GAME_ACTION_EVENT, { action }, resolve),
+  );
+
+const sendPress = (client: TypedClient, button: SignalSprintState["players"][number]["target"]) => {
+  client.emit(CONTROLLER_INPUT_EVENT, {
+    button,
+    phase: "down",
+    clientTimestamp: Date.now(),
+  });
+  client.emit(CONTROLLER_INPUT_EVENT, {
+    button,
+    phase: "up",
+    clientTimestamp: Date.now(),
+  });
+};
+
 const waitForEvent = <Event>(
   socket: TypedClient,
   eventName: string,
+  predicate: (event: Event) => boolean = () => true,
 ): Promise<Event> =>
   new Promise((resolve, reject) => {
     const timeout = setTimeout(() => reject(new Error(`Timed out: ${eventName}`)), 2_000);
-    socket.once(eventName as never, ((event: Event) => {
+    const listener = (event: Event) => {
+      if (!predicate(event)) {
+        return;
+      }
       clearTimeout(timeout);
+      socket.off(eventName as never, listener as never);
       resolve(event);
-    }) as never);
+    };
+    socket.on(eventName as never, listener as never);
   });
+
+const waitForGame = (
+  socket: TypedClient,
+  predicate: (game: SignalSprintState) => boolean,
+) => waitForEvent<SignalSprintState>(socket, HOST_GAME_STATE_EVENT, predicate);
 
 const expectJoined = (result: JoinRoomResult): ControllerSession => {
   expect(result.ok).toBe(true);
@@ -147,6 +198,7 @@ afterEach(async () => {
   }
   if (runningServer) {
     await new Promise<void>((resolve) => runningServer?.io.close(() => resolve()));
+    runningServer.dispose();
     runningServer.roomManager.dispose();
     runningServer = undefined;
   }
@@ -265,6 +317,257 @@ describe("multiplayer Socket.IO transport", () => {
     expect(listener).not.toHaveBeenCalled();
   });
 
+  it("runs the authoritative Signal Sprint lifecycle and preserves membership", async () => {
+    const server = await startServer();
+    const host = await connectClient(server.url, CONNECTION_ROLES.host);
+    const controllerOne = await connectClient(
+      server.url,
+      CONNECTION_ROLES.controller,
+    );
+    const controllerTwo = await connectClient(
+      server.url,
+      CONNECTION_ROLES.controller,
+    );
+    const room = await createRoom(host);
+    if (!room.ok) {
+      throw new Error(room.error.message);
+    }
+
+    await expect(gameAction(host, "start")).resolves.toMatchObject({
+      ok: false,
+      error: { code: "no_connected_players" },
+    });
+    const sessionOne = expectJoined(
+      await joinRoom(controllerOne, room.room.code, "Ada"),
+    );
+    expectJoined(await joinRoom(controllerTwo, room.room.code, "Grace"));
+
+    const getReady = waitForEvent<ControllerGameStatus>(
+      controllerOne,
+      CONTROLLER_GAME_STATUS_EVENT,
+    );
+    const playing = waitForGame(host, (game) => game.phase === "playing");
+    await expect(gameAction(host, "start")).resolves.toMatchObject({
+      ok: true,
+      game: { phase: "countdown", roundId: 1 },
+    });
+    await expect(getReady).resolves.toMatchObject({
+      status: "get_ready",
+      participating: true,
+    });
+    expect(JSON.stringify(await getReady)).not.toContain("target");
+    let currentGame = await playing;
+    expect(currentGame.players).toHaveLength(2);
+    expect(currentGame.players.every((player) => Boolean(player.target))).toBe(true);
+    await expect(gameAction(host, "start")).resolves.toMatchObject({
+      ok: false,
+      error: { code: "invalid_phase" },
+    });
+
+    const firstPlayer = () =>
+      currentGame.players.find(
+        (player) => player.playerId === sessionOne.player.id,
+      );
+    const firstTarget = firstPlayer()?.target;
+    if (!firstTarget) {
+      throw new Error("Expected the first player's target.");
+    }
+    const wrongButton = firstTarget === "primary" ? "secondary1" : "primary";
+    const stunned = waitForGame(
+      host,
+      (game) => game.players.some((player) => player.mistakes === 1),
+    );
+    const stunnedStatus = waitForEvent<ControllerGameStatus>(
+      controllerOne,
+      CONTROLLER_GAME_STATUS_EVENT,
+    );
+    sendPress(controllerOne, wrongButton);
+    currentGame = await stunned;
+    await expect(stunnedStatus).resolves.toMatchObject({ status: "stunned" });
+    expect(firstPlayer()).toMatchObject({ score: 0, mistakes: 1 });
+
+    sendPress(controllerOne, firstTarget);
+    const stunCleared = await waitForGame(
+      host,
+      (game) =>
+        game.players.some(
+          (player) =>
+            player.playerId === sessionOne.player.id &&
+            player.stunnedUntil === null &&
+            player.mistakes === 1,
+        ),
+    );
+    currentGame = stunCleared;
+    expect(firstPlayer()?.score).toBe(0);
+
+    for (let expectedScore = 1; expectedScore <= 15; expectedScore += 1) {
+      const target = firstPlayer()?.target;
+      if (!target) {
+        throw new Error("Expected an active target while scoring.");
+      }
+      const update = waitForGame(
+        host,
+        (game) =>
+          game.players.some(
+            (player) =>
+              player.playerId === sessionOne.player.id &&
+              player.score === expectedScore,
+          ),
+      );
+      sendPress(controllerOne, target);
+      currentGame = await update;
+    }
+
+    expect(currentGame.phase).toBe("results");
+    expect(currentGame.winnerPlayerIds).toEqual([sessionOne.player.id]);
+    expect(firstPlayer()).toMatchObject({ score: 15, mistakes: 1 });
+
+    const nextPlaying = waitForGame(
+      host,
+      (game) => game.phase === "playing" && game.roundId === 2,
+    );
+    await expect(gameAction(host, "replay")).resolves.toMatchObject({
+      ok: true,
+      game: {
+        phase: "countdown",
+        roundId: 2,
+        players: [{ score: 0, mistakes: 0 }, { score: 0, mistakes: 0 }],
+      },
+    });
+    currentGame = await nextPlaying;
+    for (let expectedScore = 1; expectedScore <= 15; expectedScore += 1) {
+      const participant = currentGame.players.find(
+        (player) => player.playerId === sessionOne.player.id,
+      );
+      if (!participant) {
+        throw new Error("Expected replay participant.");
+      }
+      const update = waitForGame(
+        host,
+        (game) =>
+          game.players.some(
+            (player) =>
+              player.playerId === sessionOne.player.id &&
+              player.score === expectedScore,
+          ),
+      );
+      sendPress(controllerOne, participant.target);
+      currentGame = await update;
+    }
+
+    await expect(gameAction(host, "return_to_lobby")).resolves.toMatchObject({
+      ok: true,
+      game: { phase: "lobby", roundId: 2, players: [] },
+    });
+    expect(server.roomManager.getRoomForHost(host.id ?? "")?.players).toHaveLength(2);
+  });
+
+  it("isolates Signal Sprint state between rooms", async () => {
+    const server = await startServer();
+    const hostOne = await connectClient(server.url, CONNECTION_ROLES.host);
+    const hostTwo = await connectClient(server.url, CONNECTION_ROLES.host);
+    const controllerOne = await connectClient(
+      server.url,
+      CONNECTION_ROLES.controller,
+    );
+    const controllerTwo = await connectClient(
+      server.url,
+      CONNECTION_ROLES.controller,
+    );
+    const roomOne = await createRoom(hostOne);
+    const roomTwo = await createRoom(hostTwo);
+    if (!roomOne.ok || !roomTwo.ok) {
+      throw new Error("Expected both rooms.");
+    }
+    expectJoined(await joinRoom(controllerOne, roomOne.room.code, "Ada"));
+    expectJoined(await joinRoom(controllerTwo, roomTwo.room.code, "Grace"));
+    const playingOne = waitForGame(hostOne, (game) => game.phase === "playing");
+    const playingTwo = waitForGame(hostTwo, (game) => game.phase === "playing");
+    await gameAction(hostOne, "start");
+    await gameAction(hostTwo, "start");
+    const stateOne = await playingOne;
+    const stateTwo = await playingTwo;
+    const hostTwoUpdates = vi.fn();
+    hostTwo.on(HOST_GAME_STATE_EVENT, hostTwoUpdates);
+    const scored = waitForGame(
+      hostOne,
+      (game) => game.players[0]?.score === 1,
+    );
+
+    sendPress(controllerOne, stateOne.players[0]!.target);
+    await scored;
+    await new Promise((resolve) => setTimeout(resolve, 40));
+
+    expect(stateTwo.players[0]?.score).toBe(0);
+    expect(hostTwoUpdates).not.toHaveBeenCalled();
+  });
+
+  it("preserves round state on reconnect, excludes late joins, and inactivates expiry", async () => {
+    const server = await startServer();
+    const host = await connectClient(server.url, CONNECTION_ROLES.host);
+    const original = await connectClient(server.url, CONNECTION_ROLES.controller);
+    const room = await createRoom(host);
+    if (!room.ok) {
+      throw new Error(room.error.message);
+    }
+    const originalSession = expectJoined(
+      await joinRoom(original, room.room.code, "Ada"),
+    );
+    const playing = waitForGame(host, (game) => game.phase === "playing");
+    await gameAction(host, "start");
+    let state = await playing;
+    const scored = waitForGame(host, (game) => game.players[0]?.score === 1);
+    sendPress(original, state.players[0]!.target);
+    state = await scored;
+    const preservedTarget = state.players[0]!.target;
+
+    const disconnected = waitForGame(
+      host,
+      (game) => game.players[0]?.connectionState === "disconnected",
+    );
+    original.disconnect();
+    await disconnected;
+    const replacement = await connectClient(
+      server.url,
+      CONNECTION_ROLES.controller,
+    );
+    const restoredState = waitForGame(
+      host,
+      (game) => game.players[0]?.connectionState === "connected",
+    );
+    await expect(
+      reconnect(replacement, originalSession.reconnectionToken),
+    ).resolves.toMatchObject({ ok: true });
+    state = await restoredState;
+    expect(state.players[0]).toMatchObject({ score: 1, target: preservedTarget });
+
+    const lateController = await connectClient(
+      server.url,
+      CONNECTION_ROLES.controller,
+    );
+    const lateStatus = waitForEvent<ControllerGameStatus>(
+      lateController,
+      CONTROLLER_GAME_STATUS_EVENT,
+    );
+    expectJoined(await joinRoom(lateController, room.room.code, "Late"));
+    await expect(lateStatus).resolves.toMatchObject({
+      status: "waiting_next_round",
+      participating: false,
+    });
+
+    const inactive = waitForGame(
+      host,
+      (game) => game.players[0]?.connectionState === "inactive",
+    );
+    replacement.disconnect();
+    state = await inactive;
+    expect(state.players[0]).toMatchObject({
+      connectionState: "inactive",
+      score: 1,
+      target: preservedTarget,
+    });
+  });
+
   it("marks disconnection and restores the same player through the transport", async () => {
     const server = await startServer();
     const host = await connectClient(server.url, CONNECTION_ROLES.host);
@@ -320,6 +623,11 @@ describe("multiplayer Socket.IO transport", () => {
       throw new Error(room.error.message);
     }
     expectJoined(await joinRoom(controller, room.room.code, "Ada"));
+    const game = server.signalSprintGames[0];
+    if (!game) {
+      throw new Error("Expected room game state.");
+    }
+    const disposeGame = vi.spyOn(game, "dispose");
     const notice = waitForEvent<RoomClosedNotice>(
       controller,
       CONTROLLER_ROOM_CLOSED_EVENT,
@@ -332,5 +640,6 @@ describe("multiplayer Socket.IO transport", () => {
       reason: "host_disconnected",
       message: "The host disconnected, so the room has closed.",
     });
+    expect(disposeGame).toHaveBeenCalledOnce();
   });
 });

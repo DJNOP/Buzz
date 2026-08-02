@@ -8,7 +8,7 @@ The product is intended to be family-friendly and still entertaining for adults 
 
 ## Current state
 
-Roadmap Milestones 1–6 are implemented:
+Roadmap Milestones 1–7 are implemented:
 
 - A real phone successfully connected over local Wi-Fi and produced exactly one low-latency host event per deliberate primary-button press, including rapid presses.
 - A host creates one temporary four-character room code for up to four distinctly identified controllers.
@@ -18,18 +18,31 @@ Roadmap Milestones 1–6 are implemented:
 - The host detects suitable local IPv4 addresses and generates a local SVG QR code containing a controller URL and the room code.
 - A scanned controller link prefills the room code but still requires a display name and server-validated join.
 - Manual room-code entry remains fully supported.
+- Signal Sprint provides one primitive server-authoritative validation game with
+  a lobby, three-second countdown, 30-second round, results, replay, and return
+  to lobby.
+- Correct five-button matches score and advance a geometric marker; wrong
+  matches record a mistake and cause a 600 ms server-authoritative stun.
+- The first player to 15 wins immediately. Otherwise the highest score wins at
+  the time limit, including explicit joint winners for ties.
+- Players retain round state through temporary reconnection, late joiners wait
+  for the next round, and expired participants become inactive for that round.
 
-The current interface remains a technical visualizer. It contains no minigame, scoring, tournament flow, artwork, matchmaking, accounts, database, deployment, or cloud service.
+Signal Sprint is provisional prototype content used to validate the shared-screen
+gameplay loop. It is not final branding or an approved production minigame. The
+project still contains no tournament flow, external artwork, audio production,
+game engine, progression, matchmaking, accounts, database, deployment, or cloud
+service.
 
 ## Repository layout
 
 ```text
 apps/
-  controller/   React/Vite URL-prefilled join flow and five-button controller
-  host/         React/Vite QR join panel and four-player diagnostic display
-  server/       Socket.IO room transport and testable LAN address discovery
+  controller/   React/Vite join flow, fixed controls, and minimal round status
+  host/         React/Vite QR lobby and shared Signal Sprint game screen
+  server/       Socket.IO transport, room lifecycle, LAN discovery, and game rules
 packages/
-  shared/       Typed protocol plus controller join-URL/query utilities
+  shared/       Typed room/game protocol plus controller join-URL/query utilities
 scripts/
   dev.mjs                    Minimal multi-process development launcher
   smoke-multiplayer.mjs      Reproducible QR and multiplayer smoke scenario
@@ -81,7 +94,29 @@ With `npm.cmd run dev` already running in one PowerShell window, run this in a s
 npm.cmd run smoke
 ```
 
-The scenario checks both pages, detected address delivery, controller URL construction, the query route, QR-prefilled and manual joining, invalid queries, two rooms, all five paired controls, invalid/full joins, cross-room isolation, controller reconnection, and host-triggered closure.
+The scenario checks both pages, detected address delivery, controller URL
+construction, QR-prefilled and manual joining, invalid/full joins, all five
+paired controls, two-room isolation, and reconnection. It then starts Signal
+Sprint with two controllers, enforces a wrong-input stun, rejects input during
+the stun, reaches the 15-point win condition, replays without reconnecting,
+keeps a second game room isolated, and verifies host-triggered cleanup.
+
+## Play Signal Sprint
+
+1. Start the stack with `npm.cmd run dev`, open the host, and create a room.
+2. Join one to four controllers by QR code or manual room code. Two to four is
+   the intended social experience; one player remains available for development.
+3. Select **Start Signal Sprint**. Players connected when the three-second
+   countdown begins participate in that round.
+4. During the 30-second race, watch only the shared host screen and press the
+   controller button matching your lane's current symbol and colour.
+5. A correct press scores one point and moves the lane marker. A wrong press
+   records a mistake and briefly stuns that controller.
+6. The first player to 15 ends the round. If time expires, the highest score
+   wins and equal leaders are joint winners.
+7. Select **Play again** to capture the currently connected roster for another
+   round, or **Return to lobby** to show the QR and room code again. Neither
+   action recreates the room or requires controllers to rejoin.
 
 ## Manual QR acceptance test
 
@@ -113,13 +148,46 @@ The reconnection token is a random private capability stored in that browser's l
 
 Screen Wake Lock remains deferred. Keep phone screens awake manually during longer tests.
 
+## Manual Signal Sprint playtest
+
+1. Connect the host to a television at 1280×720 or 1920×1080 and start the
+   development stack.
+2. Create a room and join two to four physical phones, using both QR and manual
+   room-code joining at least once.
+3. Start Signal Sprint and confirm every player sees the same 3, 2, 1 countdown
+   on the television while phones show only **Get ready**.
+4. Confirm each lane has the correct player name/number, a readable target,
+   score, marker, and mistake count.
+5. Press each player's matching button and confirm exactly one point, one marker
+   step, a changed target, and no target disclosure on the phone.
+6. Deliberately press a wrong button and confirm the host shows wrong/stun
+   feedback, the phone briefly reports **Stunned**, and rapid presses during the
+   stun do not score.
+7. Reload one participating phone during the round and confirm its player,
+   score, and target return within the 20-second grace period.
+8. Join another controller after the round begins and confirm it is told to wait
+   and joins the next replay rather than the current round.
+9. Let one round expire to verify highest-score and joint-winner results, then
+   complete another by reaching 15.
+10. Select **Play again** and verify everyone continues without rejoining; then
+    select **Return to lobby** and verify the QR, manual code, and membership are
+    preserved.
+
+Technical validation does not establish whether Signal Sprint is enjoyable,
+socially clear, or worth polishing. Record observations from this physical
+two-to-four-player playtest before adding another minigame or a tournament flow.
+
 ## MVP direction
 
 - The shared display remains the centre of attention; phone information stays minimal.
 - The standard controller uses semantic identifiers `primary`, `secondary1`, `secondary2`, `secondary3`, and `secondary4`.
 - Button colours remain presentation configuration; controls and players never rely on colour alone.
 - Local QR joining and short manual room codes coexist.
-- Internet hosting, minigames, game engines, accounts, online matchmaking, native applications, analytics, advertising, and cloud infrastructure remain deferred.
+- Signal Sprint is a deliberately small rules module, not a general minigame
+  framework or final product-content commitment.
+- Additional minigames, tournament flow, game engines, internet hosting,
+  accounts, matchmaking, native applications, analytics, advertising, and cloud
+  infrastructure remain deferred.
 
 ## Documentation
 

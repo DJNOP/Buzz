@@ -407,6 +407,12 @@ export class RoomManager {
     return room ? this.toRoomSnapshot(room) : null;
   }
 
+  getControllerSocketId(roomCode: string, playerId: string): string | null {
+    const room = this.rooms.get(roomCode);
+    const player = room ? this.findPlayer(room, playerId) : undefined;
+    return player?.socketId ?? null;
+  }
+
   dispose() {
     for (const room of this.rooms.values()) {
       for (const player of room.players.values()) {

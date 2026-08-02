@@ -8,6 +8,7 @@ import {
   type PointerEvent,
 } from "react";
 import {
+  CONTROLLER_GAME_STATUS_EVENT,
   CONTROLLER_INPUT_EVENT,
   CONTROLLER_JOIN_ROOM_EVENT,
   CONTROLLER_RECONNECT_EVENT,
@@ -17,6 +18,7 @@ import {
   parseRoomQuery,
   removeRoomQueryFromUrl,
   type ControllerButton,
+  type ControllerGameStatus,
   type ControllerSession,
   type RoomClosedNotice,
 } from "@party-game/shared";
@@ -37,6 +39,36 @@ type ConnectionState = "connecting" | "connected" | "disconnected" | "error";
 
 const INVALID_ROOM_LINK_MESSAGE =
   "This join link has an invalid room code. Enter the code shown on the host.";
+
+const GAME_STATUS_COPY: Record<
+  ControllerGameStatus["status"],
+  { title: string; detail: string }
+> = {
+  waiting_lobby: {
+    title: "Waiting in lobby",
+    detail: "The host will start the round.",
+  },
+  get_ready: {
+    title: "Get ready",
+    detail: "Watch the shared screen.",
+  },
+  round_active: {
+    title: "Round active",
+    detail: "Match the signal shown on the shared screen.",
+  },
+  stunned: {
+    title: "Stunned",
+    detail: "Wait a moment, then keep racing.",
+  },
+  waiting_next_round: {
+    title: "Waiting for next round",
+    detail: "You joined after this round began.",
+  },
+  results: {
+    title: "Round complete",
+    detail: "Results are on the shared screen.",
+  },
+};
 
 const clearConsumedRoomQuery = () => {
   const nextUrl = removeRoomQueryFromUrl(window.location.href);
@@ -118,6 +150,7 @@ export const App = () => {
     useState<ConnectionState>("connecting");
   const [connectionMessage, setConnectionMessage] = useState("Connecting…");
   const [session, setSession] = useState<ControllerSession>();
+  const [gameStatus, setGameStatus] = useState<ControllerGameStatus>();
   const [roomCode, setRoomCode] = useState(() =>
     initialRoomQuery.status === "valid" ? initialRoomQuery.roomCode : "",
   );
@@ -241,9 +274,22 @@ export const App = () => {
       clearStoredSession();
       sessionRef.current = undefined;
       setSession(undefined);
+      setGameStatus(undefined);
       setRoomCode(notice.roomCode);
       setJoinError(notice.message);
       setConnectionMessage("Connected — room closed");
+    };
+    const onGameStatus = (status: ControllerGameStatus) => {
+      if (status.status !== "round_active") {
+        tracker.releaseAll();
+      }
+      setGameStatus(status);
+      if (
+        status.status === "stunned" &&
+        typeof navigator.vibrate === "function"
+      ) {
+        navigator.vibrate([45, 30, 45]);
+      }
     };
     const releaseInputs = () => tracker.releaseAll();
     const onVisibilityChange = () => {
@@ -256,6 +302,7 @@ export const App = () => {
     controllerSocket.on("disconnect", onDisconnect);
     controllerSocket.on("connect_error", onConnectError);
     controllerSocket.on(CONTROLLER_ROOM_CLOSED_EVENT, onRoomClosed);
+    controllerSocket.on(CONTROLLER_GAME_STATUS_EVENT, onGameStatus);
     window.addEventListener("blur", releaseInputs);
     document.addEventListener("visibilitychange", onVisibilityChange);
     controllerSocket.connect();
@@ -267,6 +314,7 @@ export const App = () => {
       controllerSocket.off("disconnect", onDisconnect);
       controllerSocket.off("connect_error", onConnectError);
       controllerSocket.off(CONTROLLER_ROOM_CLOSED_EVENT, onRoomClosed);
+      controllerSocket.off(CONTROLLER_GAME_STATUS_EVENT, onGameStatus);
       window.removeEventListener("blur", releaseInputs);
       document.removeEventListener("visibilitychange", onVisibilityChange);
       controllerSocket.disconnect();
@@ -305,7 +353,13 @@ export const App = () => {
     );
   };
 
-  const controlsDisabled = connectionState !== "connected" || !session;
+  const controlsDisabled =
+    connectionState !== "connected" ||
+    !session ||
+    gameStatus?.status !== "round_active";
+  const statusCopy = gameStatus
+    ? GAME_STATUS_COPY[gameStatus.status]
+    : GAME_STATUS_COPY.waiting_lobby;
 
   return (
     <main className="controller-screen">
@@ -400,6 +454,14 @@ export const App = () => {
           </section>
 
           <section className="controls" aria-label="Game controls">
+            <div
+              className={`round-status round-status--${gameStatus?.status ?? "waiting_lobby"}`}
+              role="status"
+              aria-live="polite"
+            >
+              <strong>{statusCopy.title}</strong>
+              <span>{statusCopy.detail}</span>
+            </div>
             <ControlButton
               presentation={PRIMARY_BUTTON}
               tracker={tracker}
@@ -418,7 +480,9 @@ export const App = () => {
                 />
               ))}
             </div>
-            <p className="controller-hint">Keep your eyes on the shared screen.</p>
+            <p className="controller-hint">
+              Your target appears only on the shared screen.
+            </p>
           </section>
         </div>
       )}

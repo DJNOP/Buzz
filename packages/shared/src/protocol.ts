@@ -75,6 +75,90 @@ export interface HostPlayerInputEvent extends PlayerInputDiagnostic {
   validInputCount: number;
 }
 
+export const SIGNAL_SPRINT_PHASES = [
+  "lobby",
+  "countdown",
+  "playing",
+  "results",
+] as const;
+
+export type SignalSprintPhase = (typeof SIGNAL_SPRINT_PHASES)[number];
+export const SIGNAL_SPRINT_SCORE_TO_WIN = 15;
+
+export type SignalSprintPlayerState = PlayerConnectionState | "inactive";
+export type SignalSprintInputOutcome = "correct" | "wrong";
+
+export interface SignalSprintPlayer {
+  playerId: string;
+  playerNumber: number;
+  displayName: string;
+  accent: PlayerAccent;
+  connectionState: SignalSprintPlayerState;
+  target: ControllerButton;
+  score: number;
+  mistakes: number;
+  stunnedUntil: number | null;
+  lastOutcome: {
+    sequence: number;
+    kind: SignalSprintInputOutcome;
+    button: ControllerButton;
+    occurredAt: number;
+  } | null;
+}
+
+export interface SignalSprintState {
+  roomCode: string;
+  phase: SignalSprintPhase;
+  roundId: number;
+  countdownEndsAt: number | null;
+  roundEndsAt: number | null;
+  scoreToWin: number;
+  players: SignalSprintPlayer[];
+  winnerPlayerIds: string[];
+}
+
+export const HOST_GAME_ACTIONS = [
+  "start",
+  "replay",
+  "return_to_lobby",
+] as const;
+
+export type HostGameAction = (typeof HOST_GAME_ACTIONS)[number];
+
+export interface HostGameActionRequest {
+  action: HostGameAction;
+}
+
+export type HostGameActionErrorCode =
+  | "not_authorized"
+  | "room_not_found"
+  | "no_connected_players"
+  | "invalid_phase";
+
+export type HostGameActionResult =
+  | { ok: true; game: SignalSprintState }
+  | { ok: false; error: ProtocolError<HostGameActionErrorCode> };
+
+export const CONTROLLER_GAME_STATUSES = [
+  "waiting_lobby",
+  "get_ready",
+  "round_active",
+  "stunned",
+  "waiting_next_round",
+  "results",
+] as const;
+
+export type ControllerGameStatusKind =
+  (typeof CONTROLLER_GAME_STATUSES)[number];
+
+export interface ControllerGameStatus {
+  phase: SignalSprintPhase;
+  roundId: number;
+  status: ControllerGameStatusKind;
+  participating: boolean;
+  stunnedUntil: number | null;
+}
+
 export interface JoinRoomRequest {
   roomCode: string;
   displayName: string;
@@ -144,10 +228,13 @@ export const HOST_GET_NETWORK_ADDRESSES_EVENT =
   "host:get-network-addresses" as const;
 export const HOST_ROOM_STATE_EVENT = "host:room-state" as const;
 export const HOST_PLAYER_INPUT_EVENT = "host:player-input" as const;
+export const HOST_GAME_ACTION_EVENT = "host:game-action" as const;
+export const HOST_GAME_STATE_EVENT = "host:game-state" as const;
 export const CONTROLLER_JOIN_ROOM_EVENT = "controller:join-room" as const;
 export const CONTROLLER_RECONNECT_EVENT = "controller:reconnect" as const;
 export const CONTROLLER_INPUT_EVENT = "controller:input" as const;
 export const CONTROLLER_ROOM_CLOSED_EVENT = "controller:room-closed" as const;
+export const CONTROLLER_GAME_STATUS_EVENT = "controller:game-status" as const;
 
 type Acknowledge<Result> = (result: Result) => void;
 
@@ -155,6 +242,10 @@ export interface ClientToServerEvents {
   [HOST_CREATE_ROOM_EVENT]: (acknowledge: Acknowledge<CreateRoomResult>) => void;
   [HOST_GET_NETWORK_ADDRESSES_EVENT]: (
     acknowledge: Acknowledge<HostNetworkAddressesResult>,
+  ) => void;
+  [HOST_GAME_ACTION_EVENT]: (
+    request: HostGameActionRequest,
+    acknowledge: Acknowledge<HostGameActionResult>,
   ) => void;
   [CONTROLLER_JOIN_ROOM_EVENT]: (
     request: JoinRoomRequest,
@@ -170,7 +261,9 @@ export interface ClientToServerEvents {
 export interface ServerToClientEvents {
   [HOST_ROOM_STATE_EVENT]: (room: RoomSnapshot) => void;
   [HOST_PLAYER_INPUT_EVENT]: (event: HostPlayerInputEvent) => void;
+  [HOST_GAME_STATE_EVENT]: (game: SignalSprintState) => void;
   [CONTROLLER_ROOM_CLOSED_EVENT]: (notice: RoomClosedNotice) => void;
+  [CONTROLLER_GAME_STATUS_EVENT]: (status: ControllerGameStatus) => void;
 }
 
 export interface InterServerEvents {}
@@ -230,7 +323,15 @@ export const isReconnectControllerRequest = (
   hasExactKeys(value, ["reconnectionToken"]) &&
   typeof value.reconnectionToken === "string" &&
   value.reconnectionToken.length >= 20 &&
-  value.reconnectionToken.length <= 128;
+    value.reconnectionToken.length <= 128;
+
+export const isHostGameActionRequest = (
+  value: unknown,
+): value is HostGameActionRequest =>
+  isRecord(value) &&
+  hasExactKeys(value, ["action"]) &&
+  typeof value.action === "string" &&
+  HOST_GAME_ACTIONS.includes(value.action as HostGameAction);
 
 export const isControllerButton = (
   value: unknown,

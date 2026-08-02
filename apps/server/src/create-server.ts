@@ -2,32 +2,40 @@ import type { Server as HttpServer } from "node:http";
 import { Server } from "socket.io";
 import {
   CONNECTION_ROLES,
+  CONTROLLER_GAME_STATUS_EVENT,
   CONTROLLER_INPUT_EVENT,
   CONTROLLER_JOIN_ROOM_EVENT,
   CONTROLLER_RECONNECT_EVENT,
   CONTROLLER_ROOM_CLOSED_EVENT,
   HOST_CREATE_ROOM_EVENT,
+  HOST_GAME_ACTION_EVENT,
+  HOST_GAME_STATE_EVENT,
   HOST_GET_NETWORK_ADDRESSES_EVENT,
   HOST_PLAYER_INPUT_EVENT,
   HOST_ROOM_STATE_EVENT,
   isConnectionAuth,
+  isHostGameActionRequest,
   isJoinRoomRequest,
   isReconnectControllerRequest,
   type ClientToServerEvents,
   type CreateRoomResult,
+  type HostGameActionResult,
   type InterServerEvents,
   type LocalNetworkAddress,
   type JoinRoomResult,
   type ReconnectControllerResult,
+  type RoomSnapshot,
   type ServerToClientEvents,
   type SocketData,
 } from "@party-game/shared";
 import { discoverLocalNetworkAddresses } from "./network-address.js";
 import { RoomManager } from "./room-manager.js";
+import { SignalSprintGame } from "./signal-sprint-game.js";
 
 export interface RealtimeServerOptions {
   roomManager?: RoomManager;
   getNetworkAddresses?: () => LocalNetworkAddress[];
+  createSignalSprintGame?: (roomCode: string) => SignalSprintGame;
 }
 
 const notAuthorizedToCreate: CreateRoomResult = {
@@ -62,6 +70,14 @@ const notAuthorizedToReadNetworkAddresses = {
   },
 } as const;
 
+const notAuthorizedToControlGame: HostGameActionResult = {
+  ok: false,
+  error: {
+    code: "not_authorized",
+    message: "Only the room host can control Signal Sprint.",
+  },
+};
+
 export const createRealtimeServer = (
   httpServer: HttpServer,
   options: RealtimeServerOptions = {},
@@ -82,14 +98,68 @@ export const createRealtimeServer = (
   const roomManager = options.roomManager ?? new RoomManager();
   const getNetworkAddresses =
     options.getNetworkAddresses ?? discoverLocalNetworkAddresses;
+  const createSignalSprintGame =
+    options.createSignalSprintGame ??
+    ((roomCode: string) => new SignalSprintGame(roomCode));
+  const games = new Map<string, SignalSprintGame>();
+  const latestRooms = new Map<string, RoomSnapshot>();
+  const hostSocketByRoom = new Map<string, string>();
 
-  roomManager.subscribe((event) => {
+  const broadcastGame = (roomCode: string) => {
+    const game = games.get(roomCode);
+    const room = latestRooms.get(roomCode);
+    const hostSocketId = hostSocketByRoom.get(roomCode);
+    if (!game || !room || !hostSocketId) {
+      return;
+    }
+
+    io.sockets.sockets
+      .get(hostSocketId)
+      ?.emit(HOST_GAME_STATE_EVENT, game.getState());
+    for (const player of room.players) {
+      const controllerSocketId = roomManager.getControllerSocketId(
+        roomCode,
+        player.id,
+      );
+      if (controllerSocketId) {
+        io.sockets.sockets
+          .get(controllerSocketId)
+          ?.emit(
+            CONTROLLER_GAME_STATUS_EVENT,
+            game.getControllerStatus(player.id),
+          );
+      }
+    }
+  };
+
+  const ensureGame = (roomCode: string) => {
+    const existing = games.get(roomCode);
+    if (existing) {
+      return existing;
+    }
+    const game = createSignalSprintGame(roomCode);
+    games.set(roomCode, game);
+    game.subscribe(() => broadcastGame(roomCode));
+    return game;
+  };
+
+  const unsubscribeRoomManager = roomManager.subscribe((event) => {
     if (event.type === "room-updated") {
+      latestRooms.set(event.room.code, event.room);
+      hostSocketByRoom.set(event.room.code, event.hostSocketId);
+      const game = ensureGame(event.room.code);
+      game.syncPlayers(event.room.players);
       io.sockets.sockets
         .get(event.hostSocketId)
         ?.emit(HOST_ROOM_STATE_EVENT, event.room);
+      broadcastGame(event.room.code);
       return;
     }
+
+    games.get(event.roomCode)?.dispose();
+    games.delete(event.roomCode);
+    latestRooms.delete(event.roomCode);
+    hostSocketByRoom.delete(event.roomCode);
 
     for (const socketId of event.controllerSocketIds) {
       io.sockets.sockets.get(socketId)?.emit(CONTROLLER_ROOM_CLOSED_EVENT, {
@@ -135,6 +205,47 @@ export const createRealtimeServer = (
         // Address discovery is optional prototype infrastructure. Manual joining remains available.
       }
       acknowledge({ ok: true, addresses });
+    });
+
+    socket.on(HOST_GAME_ACTION_EVENT, (request, acknowledge) => {
+      if (typeof acknowledge !== "function") {
+        return;
+      }
+      if (socket.data.role !== CONNECTION_ROLES.host) {
+        acknowledge(notAuthorizedToControlGame);
+        return;
+      }
+      if (!isHostGameActionRequest(request)) {
+        acknowledge({
+          ok: false,
+          error: {
+            code: "invalid_phase",
+            message: "That Signal Sprint action is not available.",
+          },
+        });
+        return;
+      }
+
+      const room = roomManager.getRoomForHost(socket.id);
+      if (!room) {
+        acknowledge({
+          ok: false,
+          error: {
+            code: "room_not_found",
+            message: "Create a room before controlling Signal Sprint.",
+          },
+        });
+        return;
+      }
+
+      const game = ensureGame(room.code);
+      const result =
+        request.action === "start"
+          ? game.start(room.players)
+          : request.action === "replay"
+            ? game.replay(room.players)
+            : game.returnToLobby();
+      acknowledge(result);
     });
 
     socket.on(CONTROLLER_JOIN_ROOM_EVENT, (request, acknowledge) => {
@@ -202,6 +313,9 @@ export const createRealtimeServer = (
       io.sockets.sockets
         .get(accepted.hostSocketId)
         ?.emit(HOST_PLAYER_INPUT_EVENT, accepted.event);
+      games
+        .get(accepted.event.roomCode)
+        ?.acceptInput(accepted.event.playerId, accepted.event);
     });
 
     socket.on("disconnect", () => {
@@ -209,5 +323,15 @@ export const createRealtimeServer = (
     });
   });
 
-  return { io, roomManager };
+  const dispose = () => {
+    unsubscribeRoomManager();
+    for (const game of games.values()) {
+      game.dispose();
+    }
+    games.clear();
+    latestRooms.clear();
+    hostSocketByRoom.clear();
+  };
+
+  return { io, roomManager, dispose };
 };

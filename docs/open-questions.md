@@ -9,7 +9,8 @@ These decisions are intentionally unresolved. Add evidence, constraints, and opt
 - Should the world have one coherent setting or several themed environments?
 - What are the final button colours, shapes, arrangement, symbols, and terminology?
 - Would alternative controller layouts improve or weaken the product identity?
-- What is the exact design of the first minigame?
+- Which parts of the provisional Signal Sprint rules and presentation are fun,
+  readable, and worth retaining after a physical two-to-four-player playtest?
 
 ## Game structure
 

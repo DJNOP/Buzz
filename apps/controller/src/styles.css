@@ -285,6 +285,41 @@ input {
   gap: clamp(0.9rem, 2.5vh, 1.4rem);
 }
 
+.round-status {
+  width: min(100%, 25rem);
+  display: grid;
+  gap: 0.12rem;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-left: 0.28rem solid #8f83ff;
+  border-radius: 0.7rem;
+  background: rgb(8 11 23 / 76%);
+  text-align: center;
+}
+
+.round-status strong {
+  font-size: 0.82rem;
+}
+
+.round-status span {
+  color: #9fa9cc;
+  font-size: 0.7rem;
+}
+
+.round-status--round_active {
+  border-left-color: #55e0a5;
+}
+
+.round-status--stunned {
+  border-left-color: #ff6688;
+  background: rgb(91 20 43 / 45%);
+}
+
+.round-status--waiting_next_round,
+.round-status--results {
+  border-left-color: #ffc85c;
+}
+
 .control-button {
   --button-face: #6f65ef;
   --button-edge: #39319a;
@@ -451,8 +486,62 @@ footer strong {
     grid-row: 1;
   }
 
+  .round-status {
+    grid-column: 1 / -1;
+  }
+
   .controller-hint {
     grid-column: 1 / -1;
+  }
+}
+
+@media (max-height: 720px) and (orientation: portrait) {
+  .controller-screen {
+    gap: 0.45rem;
+    padding:
+      max(0.55rem, env(safe-area-inset-top))
+      max(0.7rem, env(safe-area-inset-right))
+      max(0.55rem, env(safe-area-inset-bottom))
+      max(0.7rem, env(safe-area-inset-left));
+  }
+
+  .controller-header {
+    gap: 0.25rem;
+  }
+
+  .connection,
+  .player-identity,
+  footer {
+    padding-top: 0.38rem;
+    padding-bottom: 0.38rem;
+  }
+
+  .controller-session {
+    gap: 0.45rem;
+  }
+
+  .controls {
+    gap: 0.55rem;
+  }
+
+  .round-status {
+    padding: 0.38rem 0.6rem;
+  }
+
+  .control-button--primary {
+    width: 7.8rem;
+  }
+
+  .control-button--secondary {
+    min-height: 3.8rem;
+  }
+
+  .secondary-grid {
+    gap: 0.55rem;
+  }
+
+  .controller-hint {
+    font-size: 0.7rem;
   }
 }
 

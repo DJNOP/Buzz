@@ -2,84 +2,133 @@
 
 ## Status
 
-This is an implemented but still provisional local-network architecture. The first real-phone input test passed, and the multiplayer plus QR-joining foundations are automated-test, smoke, build, and browser validated. Real multi-device ergonomics and real-camera QR scanning still require manual acceptance before expanding scope.
+This is an implemented but provisional local-network architecture. Room,
+controller, reconnection, QR joining, and the first primitive Signal Sprint
+minigame are automated-test, build, smoke, and browser validated. Physical
+two-to-four-player enjoyment and ergonomics remain unvalidated.
 
 ## Workspace boundaries
 
-1. **Host (`apps/host`)** — React/Vite room creation, local SVG QR rendering, address choice, and four-slot diagnostics.
-2. **Controller (`apps/controller`)** — React/Vite URL-prefilled/manual join form, private reconnection storage, player identity, and five-button capture.
-3. **Server (`apps/server`)** — Socket.IO transport, the authoritative in-memory `RoomManager`, and read-only network-interface discovery.
-4. **Shared protocol (`packages/shared`)** — typed events, acknowledgements, public room/player/session types, semantic controls, validation, and controller join-URL/query utilities.
+1. **Host (`apps/host`)** — React/Vite QR lobby plus the shared countdown,
+   player lanes, targets, timing display, feedback, and results screen.
+2. **Controller (`apps/controller`)** — React/Vite QR/manual join, private
+   reconnection storage, fixed five-button input, and minimal round status.
+3. **Server (`apps/server`)** — Socket.IO transport, authoritative
+   `RoomManager`, per-room `SignalSprintGame` rules, and read-only local-network
+   discovery.
+4. **Shared protocol (`packages/shared`)** — typed room/game events,
+   acknowledgements, public state, validation, controls, and controller
+   join-URL/query utilities.
 
-There is no game-logic package because this milestone contains no game state, rules, scoring, or minigame.
+Signal Sprint remains a focused server module rather than a new workspace or a
+general-purpose minigame/plugin framework. No game engine is used.
 
 ## Authoritative room state
 
-`RoomManager` remains the only authoritative source for:
+`RoomManager` remains the only authority for:
 
 - room code and owning host socket;
-- player ID, number, normalized display name, and temporary accent;
-- current controller socket and connected/disconnected state;
-- private reconnection token and grace timer;
-- currently pressed semantic buttons;
-- per-player valid input count and latest accepted diagnostic input.
+- player ID, number, display name, accent, controller socket, and connection;
+- private reconnection token and 20-second grace timer;
+- active-button pairing and accepted semantic controller input; and
+- room capacity, player expiry, and host-triggered closure.
 
-QR generation and address discovery do not change room authority. The server still derives trusted player and room identity from the joined socket, and it validates every join regardless of where the room code originated.
+Every input is associated with its trusted room and player from the server's
+socket indexes. Clients never submit trusted room identity, player identity,
+score, target, phase, or timing. Public room/game snapshots and QR links never
+contain reconnection tokens.
 
-## Room lifecycle and reconnection
+## Signal Sprint game state
 
-1. A connected host requests one room.
-2. The server generates a collision-checked four-character code from `ABCDEFGHJKLMNPQRSTUVWXYZ23456789`.
-3. Controllers submit a normalized code and server-validated 1–16 character display name.
-4. Invalid/nonexistent rooms, duplicate names, already-joined sockets, and capacity beyond four are rejected.
-5. The lowest free player number receives a random UUID, semantic accent, and 256-bit random base64url reconnection token.
-6. Public room snapshots and controller join URLs never contain reconnection tokens.
-7. Controller disconnects reserve the identity for 20 seconds; successful restoration cancels expiry and atomically replaces the previous socket.
-8. Host disconnect immediately removes the room, timers, indexes, and tokens and notifies connected controllers.
+Each created room receives one `SignalSprintGame` instance. It owns only the
+current validation game's rules and state:
 
-Rooms and tokens remain in memory and disappear on server restart.
+- explicit `lobby`, `countdown`, `playing`, and `results` phases;
+- monotonically increasing numeric round identifier;
+- participants captured from connected room players at countdown start;
+- one five-button target, score, mistake count, connection/inactive state,
+  stun expiry, and latest feedback per participant;
+- authoritative countdown and round deadlines; and
+- final winner player IDs, including every tied highest scorer at timeout.
 
-## Local network address discovery
+The game accepts injected clock, scheduler, cancellation, random, and duration
+options. Unit tests therefore advance fake time without real three- or
+30-second delays. Production defaults are a three-second countdown, 30-second
+round, 600 ms stun, and 15-point early-win threshold.
 
-`apps/server/src/network-address.ts` is independent of React and `RoomManager`. It accepts injected interface fixtures for tests and uses Node.js `os.networkInterfaces()` in production.
+Correct `down` input scores once, advances the target without immediately
+repeating it when alternatives exist, and ends the round at 15. Wrong `down`
+records one mistake and schedules stun expiry. `up`, malformed/unpaired/repeated
+input, input outside play, unknown/nonparticipating input, disconnected or
+inactive participants, and input during stun cannot score. The existing
+`RoomManager` down/up pairing rejects repeated physical downs before game rules
+run.
 
-Discovery:
+Only host-role sockets may request `start`, `replay`, or `return_to_lobby` via a
+single typed game-action event. The request contains only the action; the server
+derives its room from the host socket. Full game state, including targets and
+results, is emitted only to that room's host. Each connected controller receives
+a separate coarse status containing only phase/participation plus stun expiry
+when relevant—never target, score, winners, or a reconnection token.
 
-- accepts IPv4 entries only;
-- rejects entries marked internal;
-- independently excludes loopback, unspecified, link-local, multicast/reserved, malformed, and unusable addresses;
-- deduplicates addresses across interfaces;
-- prefers common private ranges in deterministic order: `192.168/16`, `10/8`, then `172.16/12`;
-- retains other usable non-internal IPv4 addresses as lower-priority candidates;
-- does not assume Wi-Fi, Ethernet, or specific adapter names; and
-- safely returns an empty list when no candidate exists.
+## Player and timer lifecycle
 
-A validated host-role socket explicitly requests this minimal list through `host:get-network-addresses`. Controller-role sockets cannot read it. These transient roles are routing boundaries, not user authentication. The host chooses the first candidate by default and shows a selector only when multiple addresses exist. Listing alternatives avoids treating a likely VPN or virtual-adapter address as unquestionably correct, but automatic adapter classification remains deliberately provisional.
+Room snapshots synchronise participant connection state with the per-room game:
 
-## QR joining
+1. Players connected when countdown begins become participants.
+2. Controllers joining during countdown or play remain valid room members but
+   receive `waiting_next_round` and are absent from current lanes.
+3. A disconnected participant retains game state while `RoomManager` reserves
+   the player. Successful token restoration reconnects the same player without
+   changing score or target.
+4. When the room slot expires, its absent participant becomes `inactive` for
+   the remainder of the round. A new player using the freed number is still a
+   distinct nonparticipant until replay.
+5. Replay captures the currently connected roster and resets scores, mistakes,
+   targets, stuns, winners, and deadlines without recreating the room.
+6. Return to lobby clears round presentation while keeping controllers joined.
+7. Host disconnection closes the room, notifies controllers, disposes game
+   phase/stun timers, and removes every game/room index. Host reconnection is not
+   supported.
 
-The host constructs `http://<selected-ip>:5174/?room=<ROOM_CODE>` with the shared `buildControllerJoinUrl` utility and `URLSearchParams`. The room value is encoded rather than interpolated into query text.
+Round-ID and phase checks make stale phase/stun callbacks harmless. Game
+disposal cancels all scheduled handles, avoiding races with room closure.
 
-`qrcode.react` 4.2.0 renders that URL locally as responsive SVG with a four-module quiet margin, dark modules, a white background, and no decorative overlay. The package is focused, typed, ISC-licensed, and has no runtime dependencies. No external QR service, analytics request, room code, URL, private token, or other data leaves the local application for QR generation.
+## Joining and local network discovery
 
-The host keeps the room code prominent, shows the complete underlying link, offers copy feedback, explains the same-network requirement, and provides a manual fallback when detection returns no address.
+`apps/server/src/network-address.ts` accepts injected interface fixtures and
+uses `os.networkInterfaces()` in production. It accepts usable non-internal IPv4
+entries, excludes internal/loopback/link-local/reserved/malformed ranges,
+deduplicates candidates, and orders common private ranges first without relying
+on adapter names. Multiple candidates remain user-selectable because VPN and
+virtual-adapter classification is provisional.
 
-## Controller URL handling
+The host constructs `http://<selected-ip>:5174/?room=<ROOM_CODE>` with shared URL
+utilities. `qrcode.react` 4.2.0 renders a local SVG with quiet margin and no
+overlay or third-party request. The query contains only the room code, never a
+reconnection token. Controller parsing normalises and validates exactly one
+`room` value, prefills without auto-joining, preserves manual entry, and removes
+the consumed parameter after successful join/restoration.
 
-The shared `parseRoomQuery` utility reads exactly one `room` parameter, normalizes it with the same room-code rules used for manual entry, and returns `missing`, `valid`, or `invalid` rather than trusting raw query text.
+Joining information remains visible only in the lobby. Replay and return to
+lobby preserve the same room, QR, address choice, and controller membership.
 
-- A valid query prefills the room field and prioritizes the name input.
-- The controller never auto-joins; a display name and server acknowledgement remain required.
-- An invalid or repeated parameter produces non-technical fallback guidance.
-- A missing parameter leaves the existing manual flow unchanged.
-- After successful joining or token restoration, only the consumed `room` parameter is removed with `history.replaceState`.
-- Existing token restoration takes priority when a current browser session can be recovered.
+## Controller input and presentation
 
-## Input protocol
+The fixed protocol uses `primary`, `secondary1`, `secondary2`, `secondary3`, and
+`secondary4` with paired `down`/`up` phases. The controller keeps pointer
+capture, cancellation/focus/visibility release, keyboard/assistive activation,
+compatibility-click suppression, haptics where supported, reconnection storage,
+and QR/manual joining.
 
-The network protocol continues to use `primary`, `secondary1`, `secondary2`, `secondary3`, and `secondary4` with `down`/`up` phases and a client timestamp. The server rejects malformed values, unjoined/expired sockets, host impersonation, repeated `down`, and unmatched `up`, then routes accepted input only to the owning host.
+Controls are logically disabled unless controller status is `round_active`.
+The phone shows lobby, get-ready, active, stunned, next-round, or results copy
+only and directs attention to the shared display. All targets and gameplay
+instructions that matter moment to moment remain on the host.
 
-Button colour, symbol, and label remain frontend presentation. The controller prevents compatibility-click duplicates, releases inputs on cancellation/focus/visibility loss, and supports keyboard or assistive activation where practical.
+The host uses React and CSS geometric shapes for targets, per-player markers,
+tracks, feedback, and results. There is no canvas engine, artwork, audio, or
+external asset.
 
 ## Local endpoints
 
@@ -87,16 +136,28 @@ Button colour, symbol, and label remain frontend presentation. The controller pr
 - Host Vite server: `0.0.0.0:5173`
 - Controller Vite server: `0.0.0.0:5174`
 
-Both browser clients derive the Socket.IO hostname from `window.location.hostname`, with an optional `VITE_SERVER_URL` development override. No current machine address is stored in production source.
+Clients derive the Socket.IO hostname from the page, with an optional
+`VITE_SERVER_URL` development override. No machine-specific address belongs in
+source control.
 
 ## Validation coverage
 
-Automated coverage includes interface filtering, private-address preference, deduplication, deterministic ordering, empty discovery, host-only address delivery, URL construction/encoding, room-query normalization/rejection/missing state, room creation, join/name/capacity rules, token secrecy, reconnect expiry/races, host closure, paired input, malformed/unjoined/host rejection, isolation, pointer cancellation, and compile-time event contracts.
+Automated coverage includes prior room, input, reconnection, network-address,
+QR URL/query, and protocol behavior plus Signal Sprint phase guards, roster
+capture, countdown/round timing, correct/wrong/up input, stun enforcement,
+target changes, duplicate prevention, 15-point completion, timeout winners and
+ties, cross-room isolation, reconnect preservation, expiry inactivation, late
+joins, replay/lobby membership, and timer cleanup.
 
-The smoke scenario verifies address delivery on the running machine, a generated controller link, the controller query route, parsed prefill, invalid/missing queries, QR-style and manual joins, all five paired controls, capacity, isolation, reconnection, and host closure.
-
-Browser QA covered a 1280×720 host, true 390×844 and 360×800 controller viewports, query consumption, invalid-link guidance, copy feedback, input routing, and application console warnings/errors. Real-camera scanning remains manual.
+The live smoke scenario uses the production game durations and validates two
+rooms, QR/manual joins, independent targets, correct/wrong inputs, stun, early
+win, results, replay, mid-round reconnect, isolation, and host closure. Browser
+QA covers 1280×720, scaled true 1920×1080, 390×844, 360×800, and 390×667 layouts.
 
 ## Deliberately deferred
 
-Real-camera acceptance aside, host reconnection, durable storage, accounts/authentication, matchmaking, internet hosting/security, native apps, smart-TV apps, game engines, scoring, tournament flow, minigames, artwork, analytics, advertising, and deployment remain outside this foundation.
+Signal Sprint is not final product content. Physical enjoyment testing,
+tournament flow, additional minigames, a generic game framework, game-engine
+selection, polished art/audio, host reconnection, persistence, accounts,
+matchmaking, internet hosting/security, native apps, smart-TV apps, analytics,
+advertising, and deployment remain outside this milestone.

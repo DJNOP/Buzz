@@ -24,6 +24,18 @@ The roadmap is deliberately sequential. Complete and evaluate each milestone bef
 - **Milestone 3:** Complete; all five semantic buttons emit paired typed phases with duplicate/stuck-input protections.
 - **Milestone 4:** Complete; hosts create isolated rooms for up to four distinctly identified players.
 - **Milestone 5:** Complete; capacity, disconnection, 20-second controller reconnection, cleanup, and core automated tests are implemented and validated.
-- **Milestone 6:** Complete in implementation and automated/browser validation; local QR generation, selectable detected addresses, safe controller prefilling, and manual fallback are implemented. Real iPhone/Android camera scanning remains the acceptance test.
+- **Milestone 6:** Complete; local QR generation, selectable detected addresses,
+  safe controller prefilling, manual fallback, and physical local joining are
+  implemented and validated.
+- **Milestone 7:** Complete in implementation and technical validation. Signal
+  Sprint provides one primitive server-authoritative minigame with a lobby,
+  countdown, 30-second race, five-button targets, scoring, stuns, results,
+  replay, reconnection-aware participation, and room isolation. It uses React,
+  CSS shapes, Socket.IO, and a focused testable rules module without a game
+  engine or general minigame framework.
 
-Run the documented real-camera and multi-controller acceptance tests before beginning Milestone 7 (a primitive playable minigame).
+The next gate is Milestone 8: run the documented physical two-to-four-player
+Signal Sprint playtest. Technical correctness does not establish enjoyment,
+social clarity, TV readability with real players, controller ergonomics, or a
+desire for another round. Do not add a tournament, additional minigame, game
+engine, or production content before evaluating that evidence.
