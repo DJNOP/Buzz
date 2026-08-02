@@ -1,14 +1,14 @@
 # Project Status
 
-- **Current phase:** Foundation
-- **Current milestone:** Repository and documentation setup
-- **Last completed task:** None
-- **Next recommended task:** Review and approve the repository foundation before scaffolding application code.
+- **Current phase:** Technical prototype validation
+- **Current milestone:** Milestones 1 and 2 implemented; real-phone validation pending
+- **Last completed task:** Implemented and locally smoke-tested one validated primary-button event from a controller browser through Socket.IO to a host visualizer.
+- **Next recommended task:** Perform the documented private-network phone test, record latency and input behaviour, and approve Milestones 1 and 2 before implementing the remaining controller buttons.
 - **Date last updated:** 2026-08-02
 
 ## Current architecture summary
 
-The proposed first prototype is a TypeScript web system with separate React/Vite host and phone-controller interfaces, a Node.js/Socket.IO real-time server, and shared TypeScript protocol definitions. It is local-network-first, has no database or authentication, and keeps game rules separate from browser-host presentation so a different host client could be introduced later. These technology choices remain provisional until early controller-to-host communication is validated.
+The repository is an npm-workspaces TypeScript system with separate React/Vite host and phone-controller interfaces, a Node.js/Socket.IO server, and a shared typed protocol package with runtime validation. For this slice, clients identify only as host or controller, the server keeps a transient set of host socket IDs, and valid controller input is forwarded without rooms, persistent identities, scoring, or game state. The browser clients derive the server host from the page URL for private-network use. The stack remains provisional pending real-device validation.
 
 ## Known unresolved questions
 
@@ -16,4 +16,4 @@ The final name, visual identity, controller styling, first minigame, tournament 
 
 ## Known technical issues
 
-None yet. Application code and dependencies have not been created, so the proposed architecture has not been validated in a working prototype.
+The automated and same-computer smoke paths pass, but a physical phone has not yet tested private-network reachability, Windows Firewall behaviour, touch ergonomics, vibration support, or real-device latency. Screen Wake Lock is intentionally deferred, so the phone may sleep during longer manual sessions.

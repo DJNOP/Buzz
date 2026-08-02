@@ -18,4 +18,8 @@ The roadmap is deliberately sequential. Complete and evaluate each milestone bef
 
 ## Current position
 
-Milestone 0 is the current milestone. Do not begin Milestone 1 until the repository foundation has been reviewed and approved.
+- **Milestone 0:** Complete and committed.
+- **Milestone 1:** Implementation, automated checks, and same-computer smoke validation complete; real phone-browser validation pending.
+- **Milestone 2:** Implementation, automated checks, and live Socket.IO smoke validation complete; real phone input/latency validation pending.
+
+Do not begin Milestone 3 until the private-network phone test has been completed and Milestones 1 and 2 have been approved.

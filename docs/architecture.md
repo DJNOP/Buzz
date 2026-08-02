@@ -4,17 +4,31 @@
 
 This document describes a working technical direction, not a permanent architecture. The early milestones exist to test its assumptions. Technology or boundaries may change when prototype evidence justifies a decision.
 
-## Proposed system
+## Implemented prototype system
 
-The initial web system is provisionally composed of:
+The current npm-workspaces system is composed of:
 
-1. **Shared host interface** — React with Vite and TypeScript, running in a desktop browser and rendering the lobby, shared gameplay, scores, and tournament state.
-2. **Phone-controller interface** — React with Vite and TypeScript, running in each player's phone browser and presenting the standard five-button controller.
-3. **Real-time server** — Node.js with Socket.IO, creating rooms and relaying typed connection, identity, input, game-state, disconnection, and reconnection events.
-4. **Shared protocol definitions** — TypeScript types and event contracts used by host, controller, and server.
-5. **Core game logic** — deterministic rules and state transitions kept independent of React rendering and, where practical, independent of browser-only APIs.
+1. **Shared host interface (`apps/host`)** — React with Vite and TypeScript, rendering connection state, one geometric input visualizer, a valid-press counter, and receipt-time diagnostics.
+2. **Phone-controller interface (`apps/controller`)** — React with Vite and TypeScript, presenting one large primary button with pointer, keyboard, assistive-click, visual, and optional vibration feedback.
+3. **Real-time server (`apps/server`)** — Node.js with Socket.IO, validating a host/controller connection role and primary-button payload before forwarding the event to currently connected host sockets.
+4. **Shared protocol (`packages/shared`)** — Socket.IO event names, payload types, connection-role types, and runtime validation functions used by both clients and the server.
 
-No packages, directory layout, or application scaffold have been selected or installed yet.
+There is no core game-logic package yet because this slice contains no game, scoring, or authoritative game state. Add that boundary only when a playable-minigame milestone creates a concrete need.
+
+## Current input flow
+
+1. The host and controller independently connect to the same server and declare a transient role in the Socket.IO handshake.
+2. The server rejects connections with malformed or unsupported role data.
+3. One controller activation emits `controller:primary-button` with a numeric client timestamp.
+4. The server verifies the sender is a controller and validates the exact payload shape.
+5. The server creates `host:primary-button` with the controller timestamp and server receipt time, then emits it to every currently connected host socket.
+6. The host increments its local diagnostic count, records browser receipt time, and replays the shape animation.
+
+No Socket.IO room, room code, player identity, persistent state, or game state exists. The transient set of host socket IDs is the only application state on the server.
+
+## Local-network addressing
+
+The server listens on `0.0.0.0:3001`. Both Vite development servers listen on all interfaces at fixed ports: host `5173`, controller `5174`. Each browser derives the server URL from `window.location.hostname` and port `3001`, with an optional `VITE_SERVER_URL` override for development. This supports both `localhost` and private IPv4 access without storing a machine-specific address.
 
 ## Target interaction flow
 
@@ -28,17 +42,17 @@ This is the intended direction across later roadmap milestones, not the required
 6. Game logic interprets the input and updates authoritative state.
 7. The host renders immediate shared-screen feedback.
 
-The exact authority model and event schema will be decided during implementation; they must not be invented as part of repository setup.
+The authority model for game state remains unresolved because this slice has no game state. The implemented input event contract is intentionally narrow and should be extended only when a later milestone requires another event.
 
 ## Responsibility boundaries
 
 | Area | Owns | Must not own |
 | --- | --- | --- |
-| Host frontend | Shared-screen rendering, host navigation, presentation feedback | Network transport internals or phone UI |
-| Controller frontend | Join flow, player-local feedback, input capture | Authoritative scoring or shared game state |
-| Server | Rooms, connections, input validation/routing, player lifecycle | Visual presentation |
+| Host frontend | Shared-screen connection state, input visualization, local diagnostics | Network validation, phone UI, scoring, or game rules |
+| Controller frontend | Connection state, accessible input capture, immediate local feedback | Authoritative scoring, shared game state, or host presentation |
+| Server | Connection roles, runtime input validation, transient host tracking, event forwarding | Rooms, persistent identity, game state, or visual presentation |
 | Shared protocol | Cross-process event names, payload types, shared identifiers | React components or transport side effects |
-| Core game logic | Rules, state transitions, scoring logic | Browser rendering or Socket.IO connections |
+| Future core game logic | Rules, state transitions, scoring logic when a minigame requires them | Browser rendering or Socket.IO connections |
 
 These boundaries should keep core rules from becoming unnecessarily coupled to the initial browser host, leaving open the possibility of another host client later.
 
@@ -64,3 +78,13 @@ These boundaries should keep core rules from becoming unnecessarily coupled to t
 Room isolation, maximum capacity, persistent player identity, disconnection, and reconnection behaviour belong to later roadmap milestones and should not be introduced during the first input-loop slice.
 
 Security, internet deployment, persistence, scaling, and production observability are intentionally deferred until the product requires them. Local-network operation still requires basic validation of client-provided events and safe handling of unexpected input.
+
+## Current validation coverage
+
+- TypeScript compilation checks all four workspaces and includes compile-time shared-event contract assertions.
+- Socket.IO integration tests cover valid forwarding, malformed and unsupported input, and repeated controller connections.
+- A controller unit test protects the pointer/click deduplication decision.
+- Production builds verify the shared package, server output, and both Vite applications.
+- A same-computer smoke test verified both browser pages, the Socket.IO handshake, and a live forwarded primary-button event.
+
+A real phone and private network are still required to validate firewall behaviour, touch ergonomics, vibration support, and real-world latency.

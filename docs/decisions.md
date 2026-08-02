@@ -58,3 +58,16 @@ Do not introduce a dedicated game engine until controller-to-host communication 
 - **Status:** Provisional architectural principle
 
 Keep frontend, real-time server, shared protocol, and game-rule responsibilities distinct. Avoid unnecessarily coupling core game rules to the first browser host so another host client could potentially be introduced later. This does not require speculative abstractions; separation should grow only as current milestones require it.
+
+## D-008 — Minimal workspace and endpoint structure
+
+- **Date:** 2026-08-02
+- **Status:** Provisional, implemented for the first input slice
+
+Use native npm workspaces for `apps/host`, `apps/controller`, `apps/server`, and `packages/shared`, without a monorepo orchestration framework. A small repository-owned Node script starts the three development processes after building the shared protocol package.
+
+For local-network development, use fixed ports (`5173` host, `5174` controller, `3001` server), listen on all interfaces, and derive the server hostname from the browser page by default. An optional environment override may replace the server URL, but no machine-specific IP address belongs in source control.
+
+For Milestones 1 and 2, use a validated transient host/controller role and a set of connected host socket IDs. Do not introduce Socket.IO rooms, persistent identities, scoring, or game state until the corresponding roadmap milestone requires them.
+
+This structure remains provisional until a real phone test confirms local-network reachability, acceptable latency, and practical controller behaviour.
