@@ -1,6 +1,6 @@
 {
-  "version": 2,
-  "recordedOn": "2026-08-02",
+  "version": 3,
+  "recordedOn": "2026-08-03",
   "status": "Temporary prototype production-pipeline proof; not final commercial artwork.",
   "runtimeRoot": "apps/host/public/assets/pixellab",
   "provenanceRoot": "docs/art-provenance/pixellab",
@@ -182,9 +182,85 @@
       "changedPixelsOutsideSharedMask": 0
     }
   },
+  "stationSets": {
+    "dimensions": [128, 96],
+    "method": "Two PixelLab MCP create_image_pixflux candidates per category using the accepted complete lighting station as init-image and forced-palette reference; accepted states derive from the selected base with PixelLab MCP inpaint_image where needed.",
+    "styleReference": "apps/host/public/assets/pixellab/light-rig/complete.png",
+    "generationUsage": {
+      "before": { "generationsRemaining": 1729, "generationsUsed": 271 },
+      "after": { "generationsRemaining": 1423, "generationsUsed": 577 },
+      "generationsUsed": 306,
+      "creditsBeforeUsd": 0,
+      "creditsAfterUsd": 0
+    },
+    "sound": {
+      "selectedBase": {
+        "path": "docs/art-provenance/pixellab/source/stations/sound/structural-source.png",
+        "jobId": "7a13cb24-29e8-4281-bb5c-872c340beea7",
+        "seed": 7101,
+        "decision": "Selected for the clearest mixing-console silhouette, waveform, integrated monitors, cable, and comparable footprint."
+      },
+      "rejectedBase": { "jobId": "57837659-8581-4465-9898-73c846bb1467", "seed": 7102 },
+      "sharedMask": "docs/art-provenance/pixellab/source/light-rig-controls-mask.png",
+      "states": {
+        "broken": { "jobId": "302931e0-5f20-4fdf-825a-e7bf7b54a9d6", "seed": 7113, "runtime": "apps/host/public/assets/pixellab/stations/sound/broken.png", "sha256": "B6BB0C72E28A1148750415404AC44D4A70601F1268D0E47BBD435040AB62D669" },
+        "partial": { "jobId": "e4a78c1b-7e89-44f8-81bc-2a7d653ab961", "seed": 7114, "runtime": "apps/host/public/assets/pixellab/stations/sound/partial.png", "sha256": "93C7C54AB55D80ACF88E195CD9BF9A9389ECA75BC6631EEBBD171E39617C35AF" },
+        "nearly-operational": { "jobId": "eee77849-9525-42cc-8ecf-b88773bf8a87", "seed": 7115, "runtime": "apps/host/public/assets/pixellab/stations/sound/nearly-operational.png", "sha256": "F6C28D01B218C831667BC84C1D430AF35CA5AB600860F10BEA22BFE98A963165" },
+        "complete": { "jobId": "7a13cb24-29e8-4281-bb5c-872c340beea7", "seed": 7101, "runtime": "apps/host/public/assets/pixellab/stations/sound/complete.png", "sha256": "907E165591E69AD87ADBD08804CF9E1B036951D8421E27F6FC016FAEF4C458CA" }
+      },
+      "alignmentValidation": { "alphaBoundingBox": [16, 13, 103, 89], "changedPixelsOutsideSharedMask": 0 },
+      "rejectedStateJobsNotRetained": [
+        { "jobId": "467d652d-501c-4f0b-9b8f-60f145f86023", "seed": 7110 },
+        { "jobId": "61188bc9-97f6-40b9-9f1e-c6c7cca16c2b", "seed": 7111 },
+        { "jobId": "ea011de7-c168-4c54-a7e7-9113d00cebfc", "seed": 7112 }
+      ]
+    },
+    "decorations": {
+      "selectedBase": {
+        "path": "docs/art-provenance/pixellab/source/stations/decorations/structural-source.png",
+        "jobId": "2e99d4fb-6bd5-4078-93e1-fdbd5ee4e2f7",
+        "seed": 7201,
+        "decision": "Selected for the clear setup bench, stable frame, organized supplies, and capacity for materially different setup states."
+      },
+      "rejectedBase": { "jobId": "6dac0861-48d7-4677-ba11-9ae461378bfe", "seed": 7202 },
+      "stateMaskRectangle": [30, 8, 68, 66],
+      "states": {
+        "broken": { "jobId": "c551e14f-ff40-4426-94db-d79ca43083b5", "seed": 7210, "runtime": "apps/host/public/assets/pixellab/stations/decorations/broken.png", "sha256": "E6EA6406BC213FD0101716F854875EE62C3C97B172D75FEEFC0E3A895B732846" },
+        "partial": { "jobId": "f5243c92-9882-44bb-9540-c582e74515e9", "seed": 7211, "runtime": "apps/host/public/assets/pixellab/stations/decorations/partial.png", "sha256": "49AF8B65565922ACDF6B447C8BC898D4F2CB53DEA667E287CF91979AE91704C4" },
+        "nearly-operational": { "jobId": "d203c471-b268-4cec-9ebd-5031d5ed8f72", "seed": 7212, "runtime": "apps/host/public/assets/pixellab/stations/decorations/nearly-operational.png", "sha256": "13D08D48DBA356A2199C54B505652CF169EB9F385F54FF8B4193E6BDDFDEC77A" },
+        "complete": { "jobId": "69cbae09-a6d1-485f-aa33-ce54c19a7363", "seed": 7213, "runtime": "apps/host/public/assets/pixellab/stations/decorations/complete.png", "sha256": "EC7EB30824F6D9C8BF9B63D345D83474B3C55935D6E2C93E67E65EF7DA298A56" }
+      },
+      "alignmentValidation": { "anchoredOutsideMask": true, "changedPixelsOutsideStateMask": 0, "alphaBoundingBoxes": { "broken": [30, 49, 98, 90], "partial": [30, 8, 98, 90], "nearly-operational": [30, 8, 98, 90], "complete": [30, 8, 98, 90] } }
+    },
+    "machinery": {
+      "selectedBase": {
+        "path": "docs/art-provenance/pixellab/source/stations/machinery/structural-source.png",
+        "jobId": "0c9b3c29-3772-4493-9f6c-e693097be0a4",
+        "seed": 7302,
+        "decision": "Selected for the clearest enclosed-control footprint, backdrop/lift display, comparable visual weight, and safe silhouette."
+      },
+      "rejectedBase": { "jobId": "95b07656-5b2d-4345-a47f-56a7c90becf8", "seed": 7301 },
+      "sharedMask": "docs/art-provenance/pixellab/source/light-rig-controls-mask.png",
+      "states": {
+        "broken": { "jobId": "27f3d11e-6b23-4058-897b-348eb64baeec", "seed": 7314, "runtime": "apps/host/public/assets/pixellab/stations/machinery/broken.png", "sha256": "7C835B903A26926BE29CA5161F6E56EABD6A28032140DF2F5E37EE9F0C7B4DDE" },
+        "partial": { "jobId": "ef6008e9-73a3-49a9-b674-5e2f779faa80", "seed": 7315, "runtime": "apps/host/public/assets/pixellab/stations/machinery/partial.png", "sha256": "1549280C510348D1EA75628B51D13AD6FB1C44E2524B36745AA1BF07B3A0F6B0" },
+        "nearly-operational": { "jobId": "01520818-e4bc-483c-bde8-e7c5fca9266f", "seed": 7316, "runtime": "apps/host/public/assets/pixellab/stations/machinery/nearly-operational.png", "sha256": "00CEC02E476569F39DC70417681B57B8A5F6373F6198B3825353CFBB5DFDADE9" },
+        "complete": { "jobId": "b45a74a2-0704-45b8-bc5e-7f2572a923be", "seed": 7317, "runtime": "apps/host/public/assets/pixellab/stations/machinery/complete.png", "sha256": "8EEC79C8F2CB0E1BC161A20F416E9C72098A08D18559E83C0254243090815E35" }
+      },
+      "alignmentValidation": { "structuralAlphaBoundingBox": [27, 8, 101, 89], "completeAlphaBoundingBox": [25, 8, 101, 89], "changedPixelsOutsideSharedMask": 0 },
+      "rejectedStateJobsNotRetained": [
+        { "jobId": "19b0f0fd-ef3c-45dc-82a4-34bd3162fbf6", "seed": 7310 }
+      ]
+    }
+  },
   "qaScreenshots": [
     "docs/art-provenance/pixellab/qa/signal-sprint-broken-1920x1080.png",
     "docs/art-provenance/pixellab/qa/signal-sprint-stunned-1920x1080.png",
-    "docs/art-provenance/pixellab/qa/signal-sprint-complete-results-1920x1080.png"
+    "docs/art-provenance/pixellab/qa/signal-sprint-complete-results-1920x1080.png",
+    "docs/art-provenance/pixellab/qa/distinct-stations-one-player-1920x1080.png",
+    "docs/art-provenance/pixellab/qa/distinct-stations-four-player-1920x1080.png",
+    "docs/art-provenance/pixellab/qa/distinct-stations-four-player-1280x720.png",
+    "docs/art-provenance/pixellab/qa/distinct-stations-results-1280x720.png",
+    "docs/art-provenance/pixellab/qa/distinct-stations-joint-results-1920x1080.png"
   ]
 }

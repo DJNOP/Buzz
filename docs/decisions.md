@@ -199,3 +199,27 @@ Keep the composition in focused React components and CSS/SVG. Do not introduce
 a canvas or game engine, and do not move presentation concepts into the server,
 shared protocol, controller, or Signal Sprint rules. Physical social playtesting
 at normal television distance remains the next product gate.
+
+## D-015 — Slot-derived distinct Signal Sprint stations
+
+- **Date:** 2026-08-03
+- **Status:** Provisional, implemented for multiplayer presentation validation
+
+Replace the temporary all-lighting presentation with four host-only station
+identities derived from the stable player number: P1 lighting, P2 sound, P3
+decorations/event setup, and P4 stage machinery. Use the same authoritative
+scores and existing broken, partial, nearly operational, and complete thresholds
+for every station. Do not add station identity to the network protocol, room
+state, controller, or game rules.
+
+Each occupied station affects its own CSS/SVG venue subsystem, so one player's
+completion never implies another station's completion. PixelLab PNGs may supply
+aligned station props, but CSS fallbacks and reduced-motion text/state remain
+available. Results reuse the same station mapping and venue rather than creating
+separate flows.
+
+These responsibilities, effects, and generated assets are provisional
+playtest material, not final product roles or production art. This change adds
+no game engine, networking architecture, scoring difference, or difficulty
+difference. Physical multiplayer evidence must decide which roles and art
+direction are worth retaining.

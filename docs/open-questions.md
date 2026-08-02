@@ -15,8 +15,9 @@ These decisions are intentionally unresolved. Add evidence, constraints, and opt
 - Would alternative controller layouts improve or weaken the product identity?
 - Which parts of the provisional Signal Sprint rules and presentation are fun,
   readable, and worth retaining after a physical two-to-four-player playtest?
-- Which distinct backstage task should each player own if the temporary model
-  where every workstation repairs a lighting-system segment proves readable?
+- Do the provisional slot-tied lighting, sound, decorations/event-setup, and
+  stage-machinery responsibilities feel equally clear and important in a
+  physical multiplayer playtest, and which roles or art direction should change?
 - Are the red/circle, blue/square, yellow/triangle, and green/diamond identities
   distinguishable at normal television distance and for colour-vision variants?
 

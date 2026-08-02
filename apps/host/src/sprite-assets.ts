@@ -1,4 +1,9 @@
 import type { RobotPresentationState } from "./robot-presentation";
+import {
+  getStationProgressState,
+  type StationProgressState,
+  type StationType,
+} from "./station-presentation";
 
 const PIXELLAB_ASSET_ROOT = "/assets/pixellab";
 
@@ -37,39 +42,31 @@ export const ROBOT_SPRITE_ASSETS: Partial<
   winning: robotAsset("winning", 3, [190, 130, 140, 180, 140, 280]),
 };
 
-export type LightRigProgressState =
-  | "broken"
-  | "partial"
-  | "nearlyOperational"
-  | "complete";
+export type LightRigProgressState = StationProgressState;
 
-export const LIGHT_RIG_SPRITE_ASSETS: Record<
-  LightRigProgressState,
-  string
+const progressAssetFamily = (directory: string) => ({
+  broken: `${PIXELLAB_ASSET_ROOT}/${directory}/broken.png`,
+  partial: `${PIXELLAB_ASSET_ROOT}/${directory}/partial.png`,
+  nearlyOperational: `${PIXELLAB_ASSET_ROOT}/${directory}/nearly-operational.png`,
+  complete: `${PIXELLAB_ASSET_ROOT}/${directory}/complete.png`,
+});
+
+export const STATION_SPRITE_ASSETS: Record<
+  StationType,
+  Record<StationProgressState, string>
 > = {
-  broken: `${PIXELLAB_ASSET_ROOT}/light-rig/broken.png`,
-  partial: `${PIXELLAB_ASSET_ROOT}/light-rig/partial.png`,
-  nearlyOperational: `${PIXELLAB_ASSET_ROOT}/light-rig/nearly-operational.png`,
-  complete: `${PIXELLAB_ASSET_ROOT}/light-rig/complete.png`,
+  lighting: progressAssetFamily("light-rig"),
+  sound: progressAssetFamily("stations/sound"),
+  decorations: progressAssetFamily("stations/decorations"),
+  machinery: progressAssetFamily("stations/machinery"),
 };
+
+export const LIGHT_RIG_SPRITE_ASSETS = STATION_SPRITE_ASSETS.lighting;
 
 export const getLightRigProgressState = (
   score: number,
   scoreToWin: number,
-): LightRigProgressState => {
-  if (scoreToWin <= 0 || score <= 0) {
-    return "broken";
-  }
-
-  const progress = score / scoreToWin;
-  if (progress >= 1) {
-    return "complete";
-  }
-  if (progress >= 2 / 3) {
-    return "nearlyOperational";
-  }
-  return "partial";
-};
+): LightRigProgressState => getStationProgressState(score, scoreToWin);
 
 export const isPixellabSpritePresentationEnabled = (
   configuredValue: string | undefined,

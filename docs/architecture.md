@@ -11,8 +11,9 @@ unvalidated.
 ## Workspace boundaries
 
 1. **Host (`apps/host`)** — React/Vite QR lobby plus the shared venue,
-   countdown overlay, reusable service robots, player workstations, independent
-   targets, venue-lighting progress, timing, feedback, and results screen.
+   countdown overlay, reusable service robots, slot-derived station
+   presentation, independent targets and venue-system progress, timing,
+   feedback, and results screen.
 2. **Controller (`apps/controller`)** — React/Vite QR/manual join, private
    reconnection storage, vertical fixed five-button input, and minimal round
    status.
@@ -131,15 +132,16 @@ instructions that matter moment to moment remain on the host.
 
 The host uses React plus CSS/HTML geometry for the venue, targets, operational
 meters, feedback, and results. `SharedVenue` composes `VenueStage`,
-`VenueLightingProgress`, and one `PlayerWorkstation` per authoritative
+`VenueSystemsProgress`, and one `PlayerWorkstation` per authoritative
 participant. `StationTargetDisplay` keeps each semantic cue inside that
 player's equipment console. The same stage is reused behind countdown and
 results presentation, so those phases remain spatially continuous without
 becoming game-rule concepts.
 
 An isolated, reversible presentation path loads approved PixelLab prototype
-robot and light-rig PNGs from the host public asset tree. The original CSS/HTML
-robot and light rig remain intentional state and image-load fallbacks. No
+robot and four-state station PNGs from the host public asset tree. The original
+CSS/HTML robot plus station-specific CSS props remain intentional state,
+feature-flag, and image-load fallbacks. No
 canvas, scene graph, animation framework, game engine, WebGL, 3D, or audio was
 introduced.
 
@@ -170,17 +172,19 @@ rapid events deterministic and prevent stale animation state after time or
 reconnection. Text labels and non-motion styling carry the same state under
 `prefers-reduced-motion`.
 
-`VenueLightingProgress` maps every participant independently through the same
-broken, partial, nearly operational, and complete thresholds and mounts those
-segments along one shared truss. The physical beam and central-stage response
-make progress primary; numeric jobs and meters remain secondary. All players
-using lighting segments is an explicitly temporary proof until distinct crew
-tasks are designed and playtested.
+The pure `station-presentation` module derives station identity only from the
+stable authoritative player number: P1 lighting, P2 sound, P3 decorations, and
+P4 machinery. It also applies the existing shared broken, partial, nearly
+operational, and complete thresholds independently. `VenueSystemsProgress` and
+`VenueStage` use those values for separate lighting fixtures, speaker signals,
+venue dressing, and curtain/backdrop/platform consequences. Numeric jobs and
+meters remain secondary. This model is host-only; no station field was added to
+the protocol, room model, controller, or game rules.
 
 `sprite-assets.ts` is the only runtime asset map. Idle, input acknowledgement,
 correct, wrong, stunned, and winning map to animated 96x96 PNGs with selected
 frames and sprite sheets retained alongside them. Working and losing remain
-CSS-only. Four aligned 128x96 light-rig states map score progress to broken,
+CSS-only. Each of the four station types maps aligned 128x96 states to broken,
 partial, nearly operational, and complete. Missing images fall back to CSS, and
 `VITE_SIGNAL_SPRINT_PIXELLAB_SPRITES=false` disables the generated path. The
 durable source and generation record lives under

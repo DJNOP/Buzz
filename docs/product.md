@@ -79,11 +79,12 @@ foreground workstations as one connected physical space. Player identity is
 redundant by colour and shape: red/circle, blue/square, yellow/triangle, and
 green/diamond; target colour remains a separate desk-display cue.
 
-Every player temporarily repairs one individually labelled segment of the same
-lighting system so authoritative score progress can visibly affect the shared
-stage without implying that every crew has completed. This is a presentation
-proof, not the final four-task design. Distinct player jobs, the robot and
-station art, venue scenery, labels, and CSS/SVG composition all remain
-provisional. A physical social playtest must determine whether this world is
-clear, appealing, and fun before any final character, task, theme, brand, or
-art-production decision.
+Occupied player slots now receive four visually distinct but mechanically
+identical responsibilities: P1 lighting, P2 sound, P3 decorations/event setup,
+and P4 stage machinery. Their existing authoritative score progress changes
+separate parts of the same venue without averaging one station into another.
+The slot assignment, responsibilities, robot and station art, venue scenery,
+labels, and CSS/SVG composition are presentation-only and remain provisional. A
+physical social playtest must determine whether these roles are clear,
+equivalent in prominence, appealing, and fun before any final character, task,
+theme, brand, or art-production decision.

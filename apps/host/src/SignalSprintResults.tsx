@@ -2,6 +2,12 @@ import type { SignalSprintPlayer, SignalSprintState } from "@party-game/shared";
 import { getPlayerIdentity } from "./player-identity";
 import type { RobotPresentation } from "./robot-presentation";
 import { ServiceRobot } from "./ServiceRobot";
+import { StationProp } from "./StationProp";
+import {
+  getStationProgressState,
+  getStationTypeForPlayerNumber,
+  STATION_METADATA,
+} from "./station-presentation";
 import { VenueStage } from "./VenueStage";
 
 export const getSignalSprintWinners = (game: SignalSprintState) =>
@@ -42,6 +48,7 @@ export const SignalSprintResults = ({
         players={game.players}
         scoreToWin={game.scoreToWin}
         celebration
+        completedPlayerIds={game.winnerPlayerIds}
       />
       <div className="results-content">
         <header className="results-heading">
@@ -59,19 +66,24 @@ export const SignalSprintResults = ({
         <div className="winner-robots" data-winner-count={winners.length}>
           {winners.map((player) => {
             const identity = getPlayerIdentity(player.playerNumber);
+            const stationType = getStationTypeForPlayerNumber(
+              player.playerNumber,
+            );
             return (
               <article
                 key={player.playerId}
                 data-player={player.playerNumber}
                 data-identity-colour={identity.colour}
+                data-station-type={stationType}
               >
+                <StationProp type={stationType} state="complete" compact />
                 <ServiceRobot
                   identity={identity}
                   presentation={getPresentation(player)}
                 />
                 <div>
                   <strong>P{player.playerNumber}</strong>
-                  <span>{player.displayName}</span>
+                  <span>{player.displayName} // {STATION_METADATA[stationType].shortLabel}</span>
                 </div>
               </article>
             );
@@ -81,21 +93,31 @@ export const SignalSprintResults = ({
         <div className="results-scoreboard" aria-label="Round scores">
           {rankedPlayers.map((player) => {
             const identity = getPlayerIdentity(player.playerNumber);
+            const stationType = getStationTypeForPlayerNumber(
+              player.playerNumber,
+            );
+            const isWinner = game.winnerPlayerIds.includes(player.playerId);
+            const stationState = isWinner
+              ? "complete"
+              : getStationProgressState(player.score, game.scoreToWin);
             return (
               <article
                 key={player.playerId}
                 data-player={player.playerNumber}
                 data-identity-colour={identity.colour}
-                data-winner={game.winnerPlayerIds.includes(player.playerId)}
+                data-station-type={stationType}
+                data-station-state={stationState}
+                data-winner={isWinner}
               >
                 <ServiceRobot
                   identity={identity}
                   presentation={getPresentation(player)}
                   compact
                 />
+                <StationProp type={stationType} state={stationState} compact />
                 <div>
                   <strong>P{player.playerNumber} // {player.displayName}</strong>
-                  <small>{player.mistakes} misroutes</small>
+                  <small>{STATION_METADATA[stationType].shortLabel} // {player.mistakes} misroutes</small>
                 </div>
                 <span>{player.score} jobs</span>
               </article>

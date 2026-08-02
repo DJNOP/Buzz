@@ -13,7 +13,7 @@ runtime mappings live in
 machine-readable provenance lives in [`manifest.json`](manifest.json). The
 generated presentation can be disabled at build or dev startup with
 `VITE_SIGNAL_SPRINT_PIXELLAB_SPRITES=false`; the repository-owned CSS robot and
-station remain the fallback.
+four distinct station fallbacks remain available.
 
 ## Approved master robot v1
 
@@ -76,25 +76,82 @@ All four raw states changed zero pixels outside the shared mask and share alpha
 bounds `(14, 13, 82, 90)`. Runtime files apply the same lossless `(16, 0)`
 translation and share alpha bounds `(30, 13, 98, 90)`.
 
+## Accepted distinct station families
+
+On 2026-08-03, PixelLab balance was 1,729 subscription generations before and
+1,423 after this generation pass: 306 generations used. Two 128x96 transparent
+PixFlux base candidates were generated for each new station using the accepted
+complete lighting station as both composition and forced-palette reference.
+The selected bases were:
+
+- **Sound 7101:** strongest immediate mixing-console silhouette, readable
+  waveform, integrated monitors, and cable while preserving robot/target space.
+- **Decorations 7201:** the only candidate with a clear setup bench, stable
+  frame, organized supplies, and enough structure for materially different
+  setup states.
+- **Machinery 7302:** clearest enclosed control footprint and backdrop/lift
+  display, with comparable visual weight and no unsafe exposed mechanism.
+
+Candidates 7102, 7202, and 7301 were rejected and are recorded only by job ID
+in the manifest. Their images were not retained. One broad-mask sound pass and
+one broad-mask machinery-broken pass were also rejected because their shells
+drifted; the accepted replacements reuse the proven light-rig controls mask so
+every pixel outside the screen/control region is identical to the selected
+source. This was one structural alignment correction, not iterative cosmetic
+regeneration.
+
+| Station | State | Job | Seed | Runtime file |
+| --- | --- | --- | ---: | --- |
+| Sound | Broken | `302931e0-5f20-4fdf-825a-e7bf7b54a9d6` | 7113 | `stations/sound/broken.png` |
+| Sound | Partial | `e4a78c1b-7e89-44f8-81bc-2a7d653ab961` | 7114 | `stations/sound/partial.png` |
+| Sound | Nearly operational | `eee77849-9525-42cc-8ecf-b88773bf8a87` | 7115 | `stations/sound/nearly-operational.png` |
+| Sound | Complete / selected base | `7a13cb24-29e8-4281-bb5c-872c340beea7` | 7101 | `stations/sound/complete.png` |
+| Decorations | Broken | `c551e14f-ff40-4426-94db-d79ca43083b5` | 7210 | `stations/decorations/broken.png` |
+| Decorations | Partial | `f5243c92-9882-44bb-9540-c582e74515e9` | 7211 | `stations/decorations/partial.png` |
+| Decorations | Nearly operational | `d203c471-b268-4cec-9ebd-5031d5ed8f72` | 7212 | `stations/decorations/nearly-operational.png` |
+| Decorations | Complete | `69cbae09-a6d1-485f-aa33-ce54c19a7363` | 7213 | `stations/decorations/complete.png` |
+| Machinery | Broken | `27f3d11e-6b23-4058-897b-348eb64baeec` | 7314 | `stations/machinery/broken.png` |
+| Machinery | Partial | `ef6008e9-73a3-49a9-b674-5e2f779faa80` | 7315 | `stations/machinery/partial.png` |
+| Machinery | Nearly operational | `01520818-e4bc-483c-bde8-e7c5fca9266f` | 7316 | `stations/machinery/nearly-operational.png` |
+| Machinery | Complete | `b45a74a2-0704-45b8-bc5e-7f2572a923be` | 7317 | `stations/machinery/complete.png` |
+
+The three selected structural sources are retained under `source/stations/`.
+All twelve runtime states are transparent 128x96 PNGs with hard alpha. Sound
+shares alpha bounds `(16, 13, 103, 89)`. Machinery keeps the same anchored
+shell and changes zero pixels outside the shared controls mask; its complete
+state adds a masked indicator at x=25. Decoration states change only within the
+recorded `(30, 8, 68, 66)` setup rectangle, preserving the base and legs; the
+broken state's smaller alpha bounds intentionally represent a collapsed setup.
+
 ## Representative QA
 
-The compact review record retains only an active broken/idle view, an
-authoritative stunned view, and the completed results view:
+The compact review record retains the original robot/lighting-state proof plus
+representative one-player, four-player, 1280x720, results, and joint-winner
+views for the distinct-station composition:
 
 - [`signal-sprint-broken-1920x1080.png`](qa/signal-sprint-broken-1920x1080.png)
 - [`signal-sprint-stunned-1920x1080.png`](qa/signal-sprint-stunned-1920x1080.png)
 - [`signal-sprint-complete-results-1920x1080.png`](qa/signal-sprint-complete-results-1920x1080.png)
+- [`distinct-stations-one-player-1920x1080.png`](qa/distinct-stations-one-player-1920x1080.png)
+- [`distinct-stations-four-player-1920x1080.png`](qa/distinct-stations-four-player-1920x1080.png)
+- [`distinct-stations-four-player-1280x720.png`](qa/distinct-stations-four-player-1280x720.png)
+- [`distinct-stations-results-1280x720.png`](qa/distinct-stations-results-1280x720.png)
+- [`distinct-stations-joint-results-1920x1080.png`](qa/distinct-stations-joint-results-1920x1080.png)
 
-The original 1920x1080 browser QA also covered idle, correct, wrong, working
-fallback, winning, all four rig thresholds, results, replay, clean consoles,
-and zero document overflow.
+Browser QA additionally covered one-, two-, three-, and four-player occupancy;
+independent mixed progress; idle, correct, wrong, stunned, working fallback, and
+winning presentation; all four shared station thresholds; results; replay;
+clean host/controller consoles; and zero document overflow. The 600 ms stun was
+observed authoritatively, but browser screenshot latency made the retained
+wrong-input frame land after the transient state cleared, so the earlier
+dedicated stunned proof remains the durable visual record for that state.
 
 ## Retention policy
 
-Unselected raw animation frames, rejected wide-mask rig states, initial and
-unapproved robot candidates, GIF previews, contact sheets, duplicate runtime
-exports, redundant screenshots, and stalled/failed attempts are intentionally
-not retained. Disposable future PixelLab work belongs under ignored
+Unselected raw animation frames, rejected wide-mask rig or station states,
+unselected station/robot candidates, GIF previews, contact sheets, duplicate
+runtime exports, redundant screenshots, and stalled/failed attempts are
+intentionally not retained. Disposable future PixelLab work belongs under ignored
 `temp/pixellab/`. After human approval, add only the selected sources here,
 copy required runtime derivatives to the public asset tree, update the manifest
 and mappings, run all validation, and keep the fallback reversible.

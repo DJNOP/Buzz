@@ -63,6 +63,9 @@ describe("Signal Sprint venue results", () => {
     expect(markup).toContain("Crew 1 + Crew 2");
     expect(markup).toContain('data-winner-count="2"');
     expect(markup.match(/data-winner="true"/g)).toHaveLength(2);
+    expect(markup).toContain('data-station-type="lighting"');
+    expect(markup).toContain('data-station-type="sound"');
+    expect(markup).toContain('data-station-state="complete"');
   });
 
   it("announces a single winner with the player number", () => {

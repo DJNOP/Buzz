@@ -2,8 +2,14 @@ import type { SignalSprintPlayer } from "@party-game/shared";
 import { getPlayerIdentity } from "./player-identity";
 import type { RobotPresentation } from "./robot-presentation";
 import { ServiceRobot } from "./ServiceRobot";
+import { StationProp } from "./StationProp";
 import { StationTargetDisplay } from "./StationTargetDisplay";
-import { getLightRigProgressState } from "./sprite-assets";
+import {
+  getStationProgressState,
+  getStationTypeForPlayerNumber,
+  STATION_METADATA,
+  STATION_PROGRESS_LABELS,
+} from "./station-presentation";
 
 export const PlayerWorkstation = ({
   player,
@@ -17,7 +23,9 @@ export const PlayerWorkstation = ({
   const identity = getPlayerIdentity(player.playerNumber);
   const progress =
     scoreToWin > 0 ? Math.min(100, (player.score / scoreToWin) * 100) : 0;
-  const stationState = getLightRigProgressState(player.score, scoreToWin);
+  const stationType = getStationTypeForPlayerNumber(player.playerNumber);
+  const station = STATION_METADATA[stationType];
+  const stationState = getStationProgressState(player.score, scoreToWin);
 
   return (
     <article
@@ -25,7 +33,9 @@ export const PlayerWorkstation = ({
       data-player={identity.number}
       data-identity-colour={identity.colour}
       data-robot-state={presentation.state}
+      data-station-type={stationType}
       data-station-state={stationState}
+      aria-label={`Player ${player.playerNumber} ${player.displayName}, ${station.label}`}
     >
       <header className="workstation-header">
         <span className={`identity-chip identity-chip--${identity.shape}`}>
@@ -34,7 +44,7 @@ export const PlayerWorkstation = ({
         <div>
           <h2>{player.displayName}</h2>
           <span>
-            {identity.colourLabel} {identity.shapeLabel} crew
+            {station.shortLabel} // {identity.colourLabel} {identity.shapeLabel}
           </span>
         </div>
         <div
@@ -48,6 +58,7 @@ export const PlayerWorkstation = ({
 
       <div className="workstation-bay">
         <div className="robot-operating-position">
+          <StationProp type={stationType} state={stationState} />
           <ServiceRobot identity={identity} presentation={presentation} />
           <span className="robot-floor-shadow" aria-hidden="true" />
         </div>
@@ -80,7 +91,7 @@ export const PlayerWorkstation = ({
 
       <footer className="workstation-deck">
         <div>
-          <span>Lighting segment</span>
+          <span>{station.responsibility}</span>
           <strong>{progress.toFixed(0)}% operational</strong>
         </div>
         <div
@@ -89,11 +100,7 @@ export const PlayerWorkstation = ({
         >
           <i style={{ width: `${progress}%` }} />
         </div>
-        <small>
-          {stationState === "nearlyOperational"
-            ? "nearly operational"
-            : stationState}
-        </small>
+        <small>{STATION_PROGRESS_LABELS[stationState]}</small>
       </footer>
     </article>
   );

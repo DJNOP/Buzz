@@ -29,11 +29,13 @@ Roadmap Milestones 1–7 and a provisional themed presentation slice are impleme
   for the next round, and expired participants become inactive for that round.
 - Signal Sprint now takes place in one connected temporary Event Rescue venue.
   A reversible PixelLab prototype path supplies one approved neutral robot per
-  player and four-state light-rig segments mounted on one shared stage truss;
-  P1 is red/circle, P2 blue/square, P3 yellow/triangle, and P4 green/diamond.
+  player and four-state station art for lighting, sound, decorations/event
+  setup, and stage machinery; P1 is red/circle, P2 blue/square, P3
+  yellow/triangle, and P4 green/diamond.
 - One to four active workstations scale across the foreground without empty
   placeholders. Each robot operates a desk-mounted independent cue while the
-  corresponding lighting segment visibly changes the central stage.
+  slot-mapped station changes its own part of the central stage: lighting,
+  speaker signals, venue dressing, or curtains/backdrop/platform.
 - The repository-owned CSS robot and station remain the intentional
   working/losing and image-load fallback. Set
   `VITE_SIGNAL_SPRINT_PIXELLAB_SPRITES=false` at build or dev startup to use
@@ -48,8 +50,9 @@ Signal Sprint and its Event Rescue world are provisional prototype content used
 to validate the shared-screen gameplay loop. They are not final branding,
 production artwork, or an approved production minigame. The PixelLab files are
 an internal production-pipeline proof with recorded provenance, not cleared
-commercial art. Giving every player one lighting-system segment is a temporary
-presentation proof; final distinct crew tasks remain unresolved. The project
+commercial art. The four slot-tied station responsibilities are provisional
+presentation candidates; their final roles and art direction remain unresolved
+pending multiplayer playtesting. The project
 still contains no tournament flow, audio production, game engine, progression,
 matchmaking, accounts, database, deployment, or cloud service.
 
@@ -180,8 +183,9 @@ Screen Wake Lock remains deferred. Keep phone screens awake manually during long
    on the television while phones show only **Get ready**.
 4. Confirm each foreground workstation has the correct player name/number,
    colour/shape robot identity, desk-mounted readable cue, job score,
-   operational meter, and misroute count, and that its matching lighting segment
-   is identifiable on the shared truss.
+   operational meter, and misroute count. Confirm P1 lighting, P2 sound, P3
+   event setup, and P4 machinery remain distinguishable from player identity and
+   each changes only its matching venue subsystem.
 5. Press each player's matching button and confirm exactly one job, one meter
    step, a changed cue, visible acknowledgement, and no target disclosure on
    the phone.

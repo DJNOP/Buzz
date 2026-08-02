@@ -1,18 +1,23 @@
 import { useEffect, useState } from "react";
 import {
-  LIGHT_RIG_SPRITE_ASSETS,
   PIXELLAB_SPRITE_PRESENTATION_ENABLED,
-  type LightRigProgressState,
+  STATION_SPRITE_ASSETS,
 } from "./sprite-assets";
+import type {
+  StationProgressState,
+  StationType,
+} from "./station-presentation";
 
-export const LightRigProp = ({
+export const StationProp = ({
+  type,
   state,
   compact = false,
 }: {
-  state: LightRigProgressState;
+  type: StationType;
+  state: StationProgressState;
   compact?: boolean;
 }) => {
-  const spriteUrl = LIGHT_RIG_SPRITE_ASSETS[state];
+  const spriteUrl = STATION_SPRITE_ASSETS[type][state];
   const [spriteLoaded, setSpriteLoaded] = useState(false);
 
   useEffect(() => {
@@ -21,15 +26,16 @@ export const LightRigProp = ({
 
   return (
     <div
-      className={`station-prop station-prop--lights ${compact ? "light-rig-prop--compact" : ""} ${spriteLoaded ? "station-prop--sprite-ready" : ""}`}
+      className={`station-prop station-prop--${type} ${compact ? "station-prop--compact" : ""} ${spriteLoaded ? "station-prop--sprite-ready" : ""}`}
+      data-station-type={type}
       data-station-state={state}
       data-visual-source={spriteLoaded ? "pixellab" : "css-fallback"}
       aria-hidden="true"
     >
-      <span /><span /><span />
+      <span /><span /><span /><span />
       {PIXELLAB_SPRITE_PRESENTATION_ENABLED ? (
         <img
-          className="light-rig-sprite"
+          className="station-sprite"
           src={spriteUrl}
           alt=""
           draggable={false}
@@ -40,4 +46,3 @@ export const LightRigProp = ({
     </div>
   );
 };
-
