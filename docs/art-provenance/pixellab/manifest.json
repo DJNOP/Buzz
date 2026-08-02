@@ -1,0 +1,190 @@
+{
+  "version": 2,
+  "recordedOn": "2026-08-02",
+  "status": "Temporary prototype production-pipeline proof; not final commercial artwork.",
+  "runtimeRoot": "apps/host/public/assets/pixellab",
+  "provenanceRoot": "docs/art-provenance/pixellab",
+  "featureFlag": "VITE_SIGNAL_SPRINT_PIXELLAB_SPRITES=false",
+  "masterRobot": {
+    "dimensions": [96, 96],
+    "designReference": "docs/art-references/service-robot-concept-clean.png",
+    "approvedStructuralSource": {
+      "path": "docs/art-provenance/pixellab/source/master-robot-refined-02.png",
+      "method": "PixelLab MCP edit_image in reference mode",
+      "jobId": "d3fc17b6-995c-4df8-90c3-4f80d46fc41a",
+      "seed": 5302
+    },
+    "approvedNeutralMaster": {
+      "path": "docs/art-provenance/pixellab/source/prototype-service-robot-master-v1.png",
+      "method": "PixelLab MCP inpaint_image with a 10x6 mouth mask at (43, 47)",
+      "jobId": "497a8d66-406e-4a8a-bbc2-e0524e915818",
+      "seed": 6601,
+      "sha256": "274B437755B780E53BB1FB1F368D378D1345D648C8D4AA563D69963491CC1235",
+      "changedPixelsOutsideMask": 0
+    },
+    "selectionHistory": {
+      "initialCandidateJobs": [
+        { "jobId": "91aba56d-bbc9-4793-85f2-ef705d29e028", "seed": 4101 },
+        { "jobId": "0f887865-881f-425e-9771-e78d2828f830", "seed": 4102 },
+        { "jobId": "1b2baef2-6e54-4d30-906f-3ddae11d84a8", "seed": 4103 },
+        { "jobId": "fd661a01-af7f-4cef-99a0-1b339c8eef66", "seed": 4104 }
+      ],
+      "refinementJobs": [
+        { "jobId": "07964fb1-8269-470b-92b3-c6cb00a270b4", "seed": 5301 },
+        { "jobId": "d3fc17b6-995c-4df8-90c3-4f80d46fc41a", "seed": 5302 }
+      ],
+      "decision": "Candidate 03 supplied the structure, Candidate 01 supplied the softer capsule silhouette, and refinement R02 was human-approved. Only R02 is retained."
+    }
+  },
+  "robotAnimations": {
+    "dimensions": [96, 96],
+    "method": "PixelLab MCP animate_image; the exact approved neutral master is selected frame 0",
+    "states": {
+      "idle": {
+        "jobId": "9783b93b-2502-422e-917b-bc893c6129de",
+        "seed": 6703,
+        "rawFrameCount": 5,
+        "selectedRawIndices": ["master", 1, 3, 4],
+        "frameDurationsMs": [260, 160, 180, 260],
+        "animation": "apps/host/public/assets/pixellab/robot/idle/idle.png",
+        "spriteSheet": "apps/host/public/assets/pixellab/robot/idle/idle-sprite-sheet.png",
+        "selectedFrames": [
+          "apps/host/public/assets/pixellab/robot/idle/frames/idle-frame-00.png",
+          "apps/host/public/assets/pixellab/robot/idle/frames/idle-frame-01.png",
+          "apps/host/public/assets/pixellab/robot/idle/frames/idle-frame-02.png",
+          "apps/host/public/assets/pixellab/robot/idle/frames/idle-frame-03.png"
+        ]
+      },
+      "input-acknowledgement": {
+        "jobId": "483ea343-13ac-4846-9d9e-3d8d9a93367c",
+        "seed": 6704,
+        "rawFrameCount": 5,
+        "selectedRawIndices": ["master", 1, 3, 4],
+        "frameDurationsMs": [240, 150, 170, 300],
+        "animation": "apps/host/public/assets/pixellab/robot/input-acknowledgement/input-acknowledgement.png",
+        "spriteSheet": "apps/host/public/assets/pixellab/robot/input-acknowledgement/input-acknowledgement-sprite-sheet.png",
+        "selectedFrames": [
+          "apps/host/public/assets/pixellab/robot/input-acknowledgement/frames/input-acknowledgement-frame-00.png",
+          "apps/host/public/assets/pixellab/robot/input-acknowledgement/frames/input-acknowledgement-frame-01.png",
+          "apps/host/public/assets/pixellab/robot/input-acknowledgement/frames/input-acknowledgement-frame-02.png",
+          "apps/host/public/assets/pixellab/robot/input-acknowledgement/frames/input-acknowledgement-frame-03.png"
+        ]
+      },
+      "correct": {
+        "jobId": "f70820f3-4ff3-4736-9b9f-4ad7b55b072f",
+        "seed": 6801,
+        "rawFrameCount": 5,
+        "selectedRawIndices": ["master", 1, 3, 4],
+        "frameDurationsMs": [220, 150, 180, 270],
+        "animation": "apps/host/public/assets/pixellab/robot/correct/correct.png",
+        "spriteSheet": "apps/host/public/assets/pixellab/robot/correct/correct-sprite-sheet.png",
+        "selectedFrames": [
+          "apps/host/public/assets/pixellab/robot/correct/frames/correct-frame-00.png",
+          "apps/host/public/assets/pixellab/robot/correct/frames/correct-frame-01.png",
+          "apps/host/public/assets/pixellab/robot/correct/frames/correct-frame-02.png",
+          "apps/host/public/assets/pixellab/robot/correct/frames/correct-frame-03.png"
+        ]
+      },
+      "wrong": {
+        "jobId": "ec77c41a-8b08-471e-98a6-f8db3e307ce4",
+        "seed": 6802,
+        "rawFrameCount": 5,
+        "selectedRawIndices": ["master", 1, 2, 4],
+        "frameDurationsMs": [220, 160, 190, 280],
+        "animation": "apps/host/public/assets/pixellab/robot/wrong/wrong.png",
+        "spriteSheet": "apps/host/public/assets/pixellab/robot/wrong/wrong-sprite-sheet.png",
+        "selectedFrames": [
+          "apps/host/public/assets/pixellab/robot/wrong/frames/wrong-frame-00.png",
+          "apps/host/public/assets/pixellab/robot/wrong/frames/wrong-frame-01.png",
+          "apps/host/public/assets/pixellab/robot/wrong/frames/wrong-frame-02.png",
+          "apps/host/public/assets/pixellab/robot/wrong/frames/wrong-frame-03.png"
+        ]
+      },
+      "stunned": {
+        "jobId": "9a04d98e-d218-4c64-a37e-11202b734031",
+        "seed": 6803,
+        "rawFrameCount": 5,
+        "selectedRawIndices": ["master", 2, 3, 4],
+        "frameDurationsMs": [220, 190, 190, 300],
+        "animation": "apps/host/public/assets/pixellab/robot/stunned/stunned.png",
+        "spriteSheet": "apps/host/public/assets/pixellab/robot/stunned/stunned-sprite-sheet.png",
+        "selectedFrames": [
+          "apps/host/public/assets/pixellab/robot/stunned/frames/stunned-frame-00.png",
+          "apps/host/public/assets/pixellab/robot/stunned/frames/stunned-frame-01.png",
+          "apps/host/public/assets/pixellab/robot/stunned/frames/stunned-frame-02.png",
+          "apps/host/public/assets/pixellab/robot/stunned/frames/stunned-frame-03.png"
+        ]
+      },
+      "winning": {
+        "jobId": "b0b58202-f126-4c12-9616-0fdb2203d727",
+        "seed": 6804,
+        "rawFrameCount": 7,
+        "selectedRawIndices": ["master", 1, 2, 3, "repaired-04", 6],
+        "frameDurationsMs": [190, 130, 140, 180, 140, 280],
+        "repairJobId": "3c8a87cd-e101-443c-a088-da342dffb5ea",
+        "repairSeed": 6805,
+        "animation": "apps/host/public/assets/pixellab/robot/winning/winning.png",
+        "spriteSheet": "apps/host/public/assets/pixellab/robot/winning/winning-sprite-sheet.png",
+        "selectedFrames": [
+          "apps/host/public/assets/pixellab/robot/winning/frames/winning-frame-00.png",
+          "apps/host/public/assets/pixellab/robot/winning/frames/winning-frame-01.png",
+          "apps/host/public/assets/pixellab/robot/winning/frames/winning-frame-02.png",
+          "apps/host/public/assets/pixellab/robot/winning/frames/winning-frame-03.png",
+          "apps/host/public/assets/pixellab/robot/winning/frames/winning-frame-04.png",
+          "apps/host/public/assets/pixellab/robot/winning/frames/winning-frame-05.png"
+        ],
+        "note": "Raw frames 4 and 5 introduced forbidden star eyes. Frame 4 received an eye-only PixelLab inpaint repair; raw frame 5 was excluded."
+      }
+    }
+  },
+  "lightRig": {
+    "dimensions": [128, 96],
+    "baseJobId": "76fa1a27-8b7f-4f0d-8dbd-9393797a011e",
+    "baseSeed": 6901,
+    "structuralSource": {
+      "path": "docs/art-provenance/pixellab/source/light-rig-structural-source.png",
+      "method": "PixelLab MCP edit_image in reference mode",
+      "jobId": "49b2ddba-904f-47bc-965e-0a01fbad9f0d",
+      "seed": 6902
+    },
+    "sharedMask": "docs/art-provenance/pixellab/source/light-rig-controls-mask.png",
+    "stateMethod": "PixelLab MCP inpaint_image from one structural source and shared mask; selected runtime states apply a lossless 16px right translation",
+    "states": {
+      "broken": {
+        "jobId": "84d2b143-63d4-463b-bf90-a99908f3f7c7",
+        "seed": 6920,
+        "acceptedRaw": "docs/art-provenance/pixellab/source/light-rig-raw/broken.png",
+        "runtime": "apps/host/public/assets/pixellab/light-rig/broken.png"
+      },
+      "partial": {
+        "jobId": "60c43027-bddf-4760-a039-ee7ba9726679",
+        "seed": 6921,
+        "acceptedRaw": "docs/art-provenance/pixellab/source/light-rig-raw/partial.png",
+        "runtime": "apps/host/public/assets/pixellab/light-rig/partial.png"
+      },
+      "nearly-operational": {
+        "jobId": "1512c420-e572-48f4-95a2-cb5c1cab42f6",
+        "seed": 6922,
+        "acceptedRaw": "docs/art-provenance/pixellab/source/light-rig-raw/nearly-operational.png",
+        "runtime": "apps/host/public/assets/pixellab/light-rig/nearly-operational.png"
+      },
+      "complete": {
+        "jobId": "4d6fe3eb-88bc-4131-9443-ce8be153a62b",
+        "seed": 6923,
+        "acceptedRaw": "docs/art-provenance/pixellab/source/light-rig-raw/complete.png",
+        "runtime": "apps/host/public/assets/pixellab/light-rig/complete.png"
+      }
+    },
+    "alignmentValidation": {
+      "rawAlphaBoundingBox": [14, 13, 82, 90],
+      "selectedAlphaBoundingBox": [30, 13, 98, 90],
+      "selectedTranslationPixels": [16, 0],
+      "changedPixelsOutsideSharedMask": 0
+    }
+  },
+  "qaScreenshots": [
+    "docs/art-provenance/pixellab/qa/signal-sprint-broken-1920x1080.png",
+    "docs/art-provenance/pixellab/qa/signal-sprint-stunned-1920x1080.png",
+    "docs/art-provenance/pixellab/qa/signal-sprint-complete-results-1920x1080.png"
+  ]
+}

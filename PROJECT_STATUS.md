@@ -3,10 +3,10 @@
 - **Current phase:** Themed Signal Sprint vertical-slice validation
 - **Current milestone:** Roadmap Milestones 1–7 plus the provisional themed
   presentation slice implemented
-- **Last completed task:** Completed the approved PixelLab production-pipeline
-  proof: added correct, wrong, stunned, and winning robot animations, generated
-  one aligned four-state light-rig family, and integrated both behind a
-  reversible host presentation path with the existing CSS fallback retained.
+- **Last completed task:** Cleaned the committed PixelLab proof for merge review:
+  retained only runtime derivatives, approved sources, complete provenance, and
+  three representative QA captures; removed rejected, unselected, redundant,
+  and duplicate review artifacts.
 - **Next recommended task:** Human-review the robot motion, light-rig progression,
   results presentation, and the visible scale mismatch when the intentionally
   CSS-only `working`/`losing` states are shown. Do not generate additional art or
@@ -27,25 +27,18 @@ independent targets, correct/wrong input, the exact 600 ms authoritative stun,
 ignored stun input, the 15-point finish, replay, reconnection, room isolation,
 and host cleanup.
 
-The art pipeline proof contains four initial PixelLab `create_image_pixflux`
-outputs plus two `edit_image` reference-mode refinements. Human review approved
-R02 as the prototype structural source. A PixelLab `inpaint_image` mouth edit
-produced a neutral 96x96 transparent master with zero pixel changes outside its
-10x6 mask.
+The PixelLab cleanup reduced the audited proof set from 162 files (1,892,214
+bytes) to 55 files (616,707 bytes): 107 fewer files and 1,275,507 fewer bytes.
+Manifest paths, all 42 transparent runtime PNGs, source dimensions, master/frame
+identity, both feature-flag build modes, and byte-identical build copies pass
+focused validation.
 
-Six PixelLab `animate_image` proofs now derive from that neutral master: idle,
-input acknowledgement, correct, wrong, stunned, and winning. The first selected
-frame of every animation is the exact approved neutral PNG. Raw results,
-selected frames, transparent sprite sheets, animated PNGs, review GIFs, jobs,
-and seeds are retained. A forbidden star-eye winning frame was repaired with a
-PixelLab eye-only inpaint; the other star-eye frame remains excluded.
-
-One 128x96 transparent light-control rig was generated with PixelLab
-`create_image_pixflux`, cleaned with a reference-preserving edit, and developed
-into broken, partial, nearly operational, and complete states with a shared
-inpaint mask. All raw states have zero pixel changes outside that mask and the
-same alpha bounding box. Selected states use one identical lossless translation
-to center them for gameplay.
+The approved 96x96 R02 structural source and neutral master, six selected robot
+animation sequences, four 128x96 light-rig states, job IDs, seeds, frame
+selections, masks, and alignment decisions remain reproducible. Selected frames
+and sprite sheets live with runtime assets; durable sources and the consolidated
+audit record live in `docs/art-provenance/pixellab/`. Disposable PixelLab work is
+narrowly ignored at `temp/pixellab/`.
 
 In-app browser QA covered the new generated-asset path in a real 1920x1080 room:
 idle, correct, wrong, stunned, working CSS fallback, winning, all four light-rig
@@ -102,11 +95,11 @@ fun, social clarity, viewing comfort on a real television, controller comfort,
 accessibility with real players, perceived latency with four phones, or a desire
 for another round.
 
-The initial candidates, two refinements, approved neutral prototype master, six
-animation proofs, light-rig family, raw outputs, provenance, and supplied design
-reference remain reviewable under `temp/pixellab/` and `docs/art-references/`.
-Selected copies are now loaded from `apps/host/public/assets/pixellab/` by the
-reversible presentation path. The CSS working/losing robot is visibly taller
+The approved source and generation record remain reviewable under
+`docs/art-provenance/pixellab/`; the supplied design reference remains under
+`docs/art-references/`. Runtime copies are loaded from
+`apps/host/public/assets/pixellab/` by the reversible presentation path. The CSS
+working/losing robot is visibly taller
 and stylistically different from the PixelLab master; resolving that mismatch
 requires a later human-approved art milestone. No new dependency, audio,
 animation engine, generic minigame framework, tournament flow, persistence,

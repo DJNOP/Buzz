@@ -28,8 +28,13 @@ Roadmap Milestones 1–7 and a provisional themed presentation slice are impleme
 - Players retain round state through temporary reconnection, late joiners wait
   for the next round, and expired participants become inactive for that round.
 - Signal Sprint now takes place in an original temporary Event Rescue venue.
-  One reusable CSS service robot works at each player's operational station;
-  P1 is red/circle, P2 blue/square, P3 yellow/triangle, and P4 green/diamond.
+  A reversible PixelLab prototype path supplies one approved neutral robot and
+  one four-state light rig per station; P1 is red/circle, P2 blue/square, P3
+  yellow/triangle, and P4 green/diamond.
+- The repository-owned CSS robot and station remain the intentional
+  working/losing and image-load fallback. Set
+  `VITE_SIGNAL_SPRINT_PIXELLAB_SPRITES=false` at build or dev startup to use
+  that fallback for every generated state.
 - The host acknowledges every accepted server-received controller down, while
   correct, wrong, stunned, working, winning, and losing presentation remains
   derived from authoritative game snapshots.
@@ -38,8 +43,9 @@ Roadmap Milestones 1–7 and a provisional themed presentation slice are impleme
 
 Signal Sprint and its Event Rescue world are provisional prototype content used
 to validate the shared-screen gameplay loop. They are not final branding,
-production artwork, or an approved production minigame. The
-project still contains no tournament flow, external artwork, audio production,
+production artwork, or an approved production minigame. The PixelLab files are
+an internal production-pipeline proof with recorded provenance, not cleared
+commercial art. The project still contains no tournament flow, audio production,
 game engine, progression, matchmaking, accounts, database, deployment, or cloud
 service.
 
@@ -73,7 +79,7 @@ npm.cmd run build
 ```
 
 No formatter or linter is included. The current quality gates are strict
-TypeScript compilation, 71 Vitest unit/integration tests, production builds,
+TypeScript compilation, 74 Vitest unit/integration tests, production builds,
 source-safety checks, browser QA, and the smoke scenario.
 
 The host uses `qrcode.react` 4.2.0, a focused zero-dependency React renderer with built-in TypeScript declarations. It renders the join QR locally as SVG; no room code, URL, or other data is sent to a QR service.
@@ -212,6 +218,8 @@ two-to-four-player playtest before adding another minigame or a tournament flow.
 - [Roadmap](docs/roadmap.md) — ordered, evidence-driven milestones.
 - [Decisions](docs/decisions.md) — accepted constraints and provisional technical decisions.
 - [Open questions](docs/open-questions.md) — unresolved product, platform, accessibility, and production choices.
+- [PixelLab provenance](docs/art-provenance/pixellab/README.md) — approved
+  prototype sources, generation records, runtime locations, and retention policy.
 - [Agent guidance](AGENTS.md) — repository working rules for coding agents.
 
 ## Originality

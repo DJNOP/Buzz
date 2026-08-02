@@ -25,6 +25,9 @@ pnpm-debug.log*
 .cache/
 .vite/
 
+# Disposable PixelLab generation and review work
+temp/pixellab/
+
 # Editors and operating systems
 .idea/
 .vscode/

@@ -152,3 +152,25 @@ Present the unchanged five semantic controller inputs as a vertical layout:
 one large round A plus full-width 1 RED, 2 BLUE, 3 YELLOW, and 4 GREEN controls.
 This is a physical-playtest candidate, not final world, character, controller,
 brand, or production-art approval.
+
+## D-013 — Reversible PixelLab production-pipeline proof
+
+- **Date:** 2026-08-02
+- **Status:** Provisional, implemented for pipeline validation
+
+Allow the human-approved neutral service-robot master and four-state light rig
+to replace selected CSS presentation states without changing game rules,
+networking, scoring, targets, or controller behavior. Keep generated asset URLs
+and frame metadata isolated in the host presentation layer. Player identity
+continues to use runtime colour and shape overlays rather than baked generated
+variants.
+
+The repository-owned CSS robot and station remain the explicit build-time and
+image-load fallback; working and losing intentionally remain CSS-only. Keep the
+approved runtime derivatives under the host public asset tree and durable
+source/provenance under `docs/art-provenance/pixellab/`. Do not track rejected
+generations, unselected frames, duplicate exports, or disposable review work.
+
+This proof demonstrates a production workflow only. It does not approve the
+assets as final commercial art, resolve licensing or accessibility, authorize
+additional generated states, or select PixelLab as a permanent art pipeline.

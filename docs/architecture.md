@@ -129,9 +129,11 @@ The phone shows lobby, get-ready, active, stunned, next-round, or results copy
 only and directs attention to the shared display. All targets and gameplay
 instructions that matter moment to moment remain on the host.
 
-The host uses React plus CSS/HTML geometry for the venue, robots, station props,
-targets, operational meters, feedback, and results. There is no canvas engine,
-external artwork, generated asset, or audio.
+The host uses React plus CSS/HTML geometry for the venue, targets, operational
+meters, feedback, and results. An isolated, reversible presentation path loads
+approved PixelLab prototype robot and light-rig PNGs from the host public asset
+tree. The original CSS/HTML robot and station remain available as intentional
+state and image-load fallbacks. There is no canvas engine or audio.
 
 ## Themed frontend presentation slice
 
@@ -143,8 +145,9 @@ The host's `player-identity` module fixes the temporary redundant identities:
 P1 red/circle, P2 blue/square, P3 yellow/triangle, and P4 green/diamond.
 `ServiceRobot` supplies one reusable neutral robot body, while `EventStation`
 combines it with a station prop, a separately styled target console, score,
-operational meter, and misroute count. All visual art is repository-owned CSS
-and HTML geometry.
+operational meter, and misroute count. The current proof can display selected
+PixelLab sprites without baking player identity into them; the existing player
+colour and shape remain separate overlays.
 
 The pure `robot-presentation` module derives one of `idle`,
 `inputAcknowledgement`, `correct`, `wrong`, `stunned`, `working`, `winning`, or
@@ -155,6 +158,16 @@ host game snapshots. Short time-derived windows and sequence-keyed pulses make
 rapid events deterministic and prevent stale animation state after time or
 reconnection. Text labels and non-motion styling carry the same state under
 `prefers-reduced-motion`.
+
+`sprite-assets.ts` is the only runtime asset map. Idle, input acknowledgement,
+correct, wrong, stunned, and winning map to animated 96x96 PNGs with selected
+frames and sprite sheets retained alongside them. Working and losing remain
+CSS-only. Four aligned 128x96 light-rig states map score progress to broken,
+partial, nearly operational, and complete. Missing images fall back to CSS, and
+`VITE_SIGNAL_SPRINT_PIXELLAB_SPRITES=false` disables the generated path. The
+durable source and generation record lives under
+`docs/art-provenance/pixellab/`; disposable generation work does not belong in
+the tracked runtime tree.
 
 The controller renders the same semantic protocol controls as one large round A
 and a fixed full-width stack: 1 RED, 2 BLUE, 3 YELLOW, 4 GREEN. This changes no
