@@ -8,7 +8,7 @@ The product is intended to be family-friendly and still entertaining for adults 
 
 ## Current state
 
-Roadmap Milestones 1–7 are implemented:
+Roadmap Milestones 1–7 and a provisional themed presentation slice are implemented:
 
 - A real phone successfully connected over local Wi-Fi and produced exactly one low-latency host event per deliberate primary-button press, including rapid presses.
 - A host creates one temporary four-character room code for up to four distinctly identified controllers.
@@ -27,9 +27,18 @@ Roadmap Milestones 1–7 are implemented:
   the time limit, including explicit joint winners for ties.
 - Players retain round state through temporary reconnection, late joiners wait
   for the next round, and expired participants become inactive for that round.
+- Signal Sprint now takes place in an original temporary Event Rescue venue.
+  One reusable CSS service robot works at each player's operational station;
+  P1 is red/circle, P2 blue/square, P3 yellow/triangle, and P4 green/diamond.
+- The host acknowledges every accepted server-received controller down, while
+  correct, wrong, stunned, working, winning, and losing presentation remains
+  derived from authoritative game snapshots.
+- Joined phones use a vertical no-scroll layout: a large round A followed by
+  full-width 1 RED, 2 BLUE, 3 YELLOW, and 4 GREEN controls.
 
-Signal Sprint is provisional prototype content used to validate the shared-screen
-gameplay loop. It is not final branding or an approved production minigame. The
+Signal Sprint and its Event Rescue world are provisional prototype content used
+to validate the shared-screen gameplay loop. They are not final branding,
+production artwork, or an approved production minigame. The
 project still contains no tournament flow, external artwork, audio production,
 game engine, progression, matchmaking, accounts, database, deployment, or cloud
 service.
@@ -38,8 +47,8 @@ service.
 
 ```text
 apps/
-  controller/   React/Vite join flow, fixed controls, and minimal round status
-  host/         React/Vite QR lobby and shared Signal Sprint game screen
+  controller/   React/Vite join flow, vertical fixed controls, and round status
+  host/         React/Vite QR lobby, venue, robots, stations, and game screen
   server/       Socket.IO transport, room lifecycle, LAN discovery, and game rules
 packages/
   shared/       Typed room/game protocol plus controller join-URL/query utilities
@@ -63,7 +72,9 @@ npm.cmd test
 npm.cmd run build
 ```
 
-No formatter or linter is included. The current quality gates are strict TypeScript compilation, Vitest unit/integration tests, production builds, source-safety checks, browser QA, and the smoke scenario.
+No formatter or linter is included. The current quality gates are strict
+TypeScript compilation, 71 Vitest unit/integration tests, production builds,
+source-safety checks, browser QA, and the smoke scenario.
 
 The host uses `qrcode.react` 4.2.0, a focused zero-dependency React renderer with built-in TypeScript declarations. It renders the join QR locally as SVG; no room code, URL, or other data is sent to a QR service.
 
@@ -109,9 +120,10 @@ keeps a second game room isolated, and verifies host-triggered cleanup.
 3. Select **Start Signal Sprint**. Players connected when the three-second
    countdown begins participate in that round.
 4. During the 30-second race, watch only the shared host screen and press the
-   controller button matching your lane's current symbol and colour.
-5. A correct press scores one point and moves the lane marker. A wrong press
-   records a mistake and briefly stuns that controller.
+   controller button matching your station's current cue.
+5. A correct press scores one completed job and advances the station's
+   operational meter. A wrong press records a misroute and briefly stuns that
+   service robot and controller.
 6. The first player to 15 ends the round. If time expires, the highest score
    wins and equal leaders are joint winners.
 7. Select **Play again** to capture the currently connected roster for another
@@ -156,10 +168,11 @@ Screen Wake Lock remains deferred. Keep phone screens awake manually during long
    room-code joining at least once.
 3. Start Signal Sprint and confirm every player sees the same 3, 2, 1 countdown
    on the television while phones show only **Get ready**.
-4. Confirm each lane has the correct player name/number, a readable target,
-   score, marker, and mistake count.
-5. Press each player's matching button and confirm exactly one point, one marker
-   step, a changed target, and no target disclosure on the phone.
+4. Confirm each station has the correct player name/number, colour/shape robot
+   identity, readable cue, job score, operational meter, and misroute count.
+5. Press each player's matching button and confirm exactly one job, one meter
+   step, a changed cue, visible acknowledgement, and no target disclosure on
+   the phone.
 6. Deliberately press a wrong button and confirm the host shows wrong/stun
    feedback, the phone briefly reports **Stunned**, and rapid presses during the
    stun do not score.
@@ -181,10 +194,12 @@ two-to-four-player playtest before adding another minigame or a tournament flow.
 
 - The shared display remains the centre of attention; phone information stays minimal.
 - The standard controller uses semantic identifiers `primary`, `secondary1`, `secondary2`, `secondary3`, and `secondary4`.
-- Button colours remain presentation configuration; controls and players never rely on colour alone.
+- The current presentation maps them to A, 1 RED, 2 BLUE, 3 YELLOW, and 4
+  GREEN. Controls and players never rely on colour alone.
 - Local QR joining and short manual room codes coexist.
-- Signal Sprint is a deliberately small rules module, not a general minigame
-  framework or final product-content commitment.
+- Signal Sprint remains a deliberately small rules module. Its Event Rescue
+  venue and robots are frontend presentation, not a general minigame framework
+  or final product-content commitment.
 - Additional minigames, tournament flow, game engines, internet hosting,
   accounts, matchmaking, native applications, analytics, advertising, and cloud
   infrastructure remain deferred.

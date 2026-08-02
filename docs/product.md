@@ -23,7 +23,11 @@ The initial phone controller contains:
 - one large primary action button; and
 - four smaller coloured buttons.
 
-This standard five-button controller is the core control scheme for at least the first three prototype minigames. Its original arrangement, shapes, styling, symbols, terminology, and feedback remain to be designed.
+This standard five-button controller is the core control scheme for at least the
+first three prototype minigames. The current themed validation slice uses one
+large round A above four stacked, full-width controls labelled 1 RED, 2 BLUE, 3
+YELLOW, and 4 GREEN. This is a provisional ergonomics and identity choice to
+test with real players, not a final controller-design commitment.
 
 Individual minigames may eventually use alternative phone layouts, gestures, hidden information, sliders, directional controls, or other inputs. Those options are deferred until the standard controller has been implemented and tested; they are possibilities, not current requirements.
 
@@ -65,3 +69,13 @@ The following requirements are non-negotiable:
 ## Product validation goal
 
 Early prototypes should validate the controller-to-host loop before expanding scope: connection reliability, response latency, five-button ergonomics, accessibility, whether simple minigames work on a shared screen, and whether players genuinely want another round.
+
+## Provisional Event Rescue slice
+
+Signal Sprint currently stages the validation loop as an original event venue
+being prepared by four identical temporary service robots. Player identity is
+redundant by colour and shape: red/circle, blue/square, yellow/triangle, and
+green/diamond. The robots, venue, station tasks, labels, and CSS/SVG styling are
+temporary test content. A physical playtest must determine whether this world
+improves shared-screen clarity and appeal before any final character, theme,
+brand, or art-production decision.

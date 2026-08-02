@@ -3,16 +3,19 @@
 ## Status
 
 This is an implemented but provisional local-network architecture. Room,
-controller, reconnection, QR joining, and the first primitive Signal Sprint
-minigame are automated-test, build, smoke, and browser validated. Physical
-two-to-four-player enjoyment and ergonomics remain unvalidated.
+controller, reconnection, QR joining, the focused Signal Sprint rules, and its
+first themed frontend vertical slice are automated-test, build, smoke, and
+browser validated. Physical two-to-four-player enjoyment and ergonomics remain
+unvalidated.
 
 ## Workspace boundaries
 
 1. **Host (`apps/host`)** — React/Vite QR lobby plus the shared countdown,
-   player lanes, targets, timing display, feedback, and results screen.
+   event stations, reusable service robots, targets, timing,
+   presentation-state feedback, and results screen.
 2. **Controller (`apps/controller`)** — React/Vite QR/manual join, private
-   reconnection storage, fixed five-button input, and minimal round status.
+   reconnection storage, vertical fixed five-button input, and minimal round
+   status.
 3. **Server (`apps/server`)** — Socket.IO transport, authoritative
    `RoomManager`, per-room `SignalSprintGame` rules, and read-only local-network
    discovery.
@@ -126,9 +129,36 @@ The phone shows lobby, get-ready, active, stunned, next-round, or results copy
 only and directs attention to the shared display. All targets and gameplay
 instructions that matter moment to moment remain on the host.
 
-The host uses React and CSS geometric shapes for targets, per-player markers,
-tracks, feedback, and results. There is no canvas engine, artwork, audio, or
-external asset.
+The host uses React plus CSS/HTML geometry for the venue, robots, station props,
+targets, operational meters, feedback, and results. There is no canvas engine,
+external artwork, generated asset, or audio.
+
+## Themed frontend presentation slice
+
+The Event Rescue venue is isolated to host/controller presentation. The
+`SignalSprintGame`, room manager, transport authority, and shared protocol do
+not know about robots, stations, identity shapes, or animation states.
+
+The host's `player-identity` module fixes the temporary redundant identities:
+P1 red/circle, P2 blue/square, P3 yellow/triangle, and P4 green/diamond.
+`ServiceRobot` supplies one reusable neutral robot body, while `EventStation`
+combines it with a station prop, a separately styled target console, score,
+operational meter, and misroute count. All visual art is repository-owned CSS
+and HTML geometry.
+
+The pure `robot-presentation` module derives one of `idle`,
+`inputAcknowledgement`, `correct`, `wrong`, `stunned`, `working`, `winning`, or
+`losing`. Only the trusted `host:player-input` down event creates an input
+acknowledgement, and it is keyed to the server-associated player ID. Correct,
+wrong, stun, score/work, and result states come only from full authoritative
+host game snapshots. Short time-derived windows and sequence-keyed pulses make
+rapid events deterministic and prevent stale animation state after time or
+reconnection. Text labels and non-motion styling carry the same state under
+`prefers-reduced-motion`.
+
+The controller renders the same semantic protocol controls as one large round A
+and a fixed full-width stack: 1 RED, 2 BLUE, 3 YELLOW, 4 GREEN. This changes no
+input pairing, release, haptic, reconnect, or target-privacy behavior.
 
 ## Local endpoints
 
@@ -152,7 +182,11 @@ joins, replay/lobby membership, and timer cleanup.
 The live smoke scenario uses the production game durations and validates two
 rooms, QR/manual joins, independent targets, correct/wrong inputs, stun, early
 win, results, replay, mid-round reconnect, isolation, and host closure. Browser
-QA covers 1280×720, scaled true 1920×1080, 390×844, 360×800, and 390×667 layouts.
+QA covers exact 1280×720 and 1920×1080 host document measurements and exact
+390×844, 360×800, and 390×667 controller document measurements. It also covers
+one-, two-, and four-player presentation, lobby/countdown/active/results
+lifecycle, wrong and stun sequencing, trusted acknowledgement association,
+replay, return to lobby, and clean direct application consoles.
 
 ## Deliberately deferred
 

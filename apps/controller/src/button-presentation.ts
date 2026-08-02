@@ -13,8 +13,8 @@ export const PRIMARY_BUTTON: ButtonPresentation = {
 };
 
 export const SECONDARY_BUTTONS: ButtonPresentation[] = [
-  { button: "secondary1", label: "One", symbol: "1" },
-  { button: "secondary2", label: "Two", symbol: "2" },
-  { button: "secondary3", label: "Three", symbol: "3" },
-  { button: "secondary4", label: "Four", symbol: "4" },
+  { button: "secondary1", label: "Red", symbol: "1" },
+  { button: "secondary2", label: "Blue", symbol: "2" },
+  { button: "secondary3", label: "Yellow", symbol: "3" },
+  { button: "secondary4", label: "Green", symbol: "4" },
 ];

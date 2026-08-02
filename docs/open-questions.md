@@ -5,12 +5,18 @@ These decisions are intentionally unresolved. Add evidence, constraints, and opt
 ## Product and identity
 
 - What are the final game name and branding?
-- What character species and visual theme should define the game?
+- Does the provisional Event Rescue venue and neutral service-robot crew improve
+  clarity and appeal with real players, or should a different character/world
+  direction define the game?
 - Should the world have one coherent setting or several themed environments?
-- What are the final button colours, shapes, arrangement, symbols, and terminology?
+- Does the current round A plus vertical 1 RED, 2 BLUE, 3 YELLOW, 4 GREEN stack
+  remain comfortable and readable across four physical phones, and which parts
+  should survive into the final controller design?
 - Would alternative controller layouts improve or weaken the product identity?
 - Which parts of the provisional Signal Sprint rules and presentation are fun,
   readable, and worth retaining after a physical two-to-four-player playtest?
+- Are the red/circle, blue/square, yellow/triangle, and green/diamond identities
+  distinguishable at normal television distance and for colour-vision variants?
 
 ## Game structure
 

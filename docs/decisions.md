@@ -127,3 +127,28 @@ Signal Sprint's title, exact rules, symbols, colours, and presentation are
 prototype evidence rather than approved production content. Add no engine,
 art/audio asset, persistence, tournament flow, or additional minigame until the
 physical enjoyment playtest justifies another investment.
+
+## D-012 — Provisional Event Rescue presentation slice
+
+- **Date:** 2026-08-02
+- **Status:** Provisional, implemented for themed vertical-slice validation
+
+Test Signal Sprint in an original temporary Event Rescue venue with four
+identical neutral service robots. Give each player a redundant presentation
+identity—P1 red/circle, P2 blue/square, P3 yellow/triangle, and P4
+green/diamond—and keep controller targets visually localized to a separate
+station console. Use only repository-owned CSS/HTML geometry for this slice;
+introduce no external or generated art asset, audio, animation engine, or game
+engine.
+
+Keep this theme strictly out of server game rules and shared protocol. A focused
+host presentation module may consume the existing trusted player-input event
+for receipt acknowledgement, but correct, wrong, stun, work progress, and
+winning/losing states must come only from authoritative game snapshots. Use
+time-derived transient states and visible labels so rapid events expire
+predictably and reduced-motion presentation retains the information.
+
+Present the unchanged five semantic controller inputs as a vertical layout:
+one large round A plus full-width 1 RED, 2 BLUE, 3 YELLOW, and 4 GREEN controls.
+This is a physical-playtest candidate, not final world, character, controller,
+brand, or production-art approval.

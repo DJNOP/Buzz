@@ -6,18 +6,34 @@ import {
   HOST_GAME_ACTION_EVENT,
   HOST_GAME_STATE_EVENT,
   HOST_GET_NETWORK_ADDRESSES_EVENT,
+  HOST_PLAYER_INPUT_EVENT,
   HOST_ROOM_STATE_EVENT,
   type HostGameAction,
+  type HostPlayerInputEvent,
   type LocalNetworkAddress,
   type PublicPlayer,
   type RoomSnapshot,
-  type SignalSprintPlayer,
   type SignalSprintState,
 } from "@party-game/shared";
-import { BUTTON_PRESENTATION } from "./button-presentation";
+import { EventStation } from "./EventStation";
+import { getPlayerIdentity } from "./player-identity";
+import {
+  deriveRobotPresentation,
+  recordRobotAcknowledgement,
+  type RobotAcknowledgements,
+  type RobotPresentation,
+} from "./robot-presentation";
+import { ServiceRobot } from "./ServiceRobot";
 import { hostSocket, serverUrl } from "./socket";
 
 type ConnectionState = "connecting" | "connected" | "disconnected" | "error";
+
+const COUNTDOWN_ROBOT_PRESENTATION: RobotPresentation = {
+  state: "idle",
+  label: "Ready for call time",
+  acknowledgementSequence: null,
+  showAcknowledgement: false,
+};
 
 const copyText = async (value: string) => {
   if (navigator.clipboard?.writeText) {
@@ -48,20 +64,41 @@ const EmptySlot = ({ number }: { number: number }) => (
   </article>
 );
 
-const LobbyPlayer = ({ player }: { player: PublicPlayer }) => (
-  <article
-    className={`lobby-player lobby-player--${player.connectionState}`}
-    data-accent={player.accent}
-  >
-    <span className="player-number">P{player.number}</span>
-    <div>
-      <strong>{player.displayName}</strong>
-      <span>
-        {player.connectionState === "connected" ? "Ready" : "Reconnecting..."}
-      </span>
-    </div>
-  </article>
-);
+const LobbyPlayer = ({ player }: { player: PublicPlayer }) => {
+  const identity = getPlayerIdentity(player.number);
+  const presentation: RobotPresentation = {
+    state: "idle",
+    label:
+      player.connectionState === "connected" ? "Crew ready" : "Reconnecting",
+    acknowledgementSequence: null,
+    showAcknowledgement: false,
+  };
+
+  return (
+    <article
+      className={`lobby-player lobby-player--${player.connectionState}`}
+      data-player={player.number}
+      data-identity-colour={identity.colour}
+    >
+      <ServiceRobot
+        identity={identity}
+        presentation={presentation}
+        compact
+      />
+      <div>
+        <span className={`identity-chip identity-chip--${identity.shape}`}>
+          P{player.number}
+        </span>
+        <strong>{player.displayName}</strong>
+        <span>
+          {player.connectionState === "connected"
+            ? `${identity.colourLabel} ${identity.shapeLabel} crew`
+            : "Reconnecting..."}
+        </span>
+      </div>
+    </article>
+  );
+};
 
 interface JoinCardProps {
   room: RoomSnapshot;
@@ -165,84 +202,6 @@ const JoinCard = ({
   );
 };
 
-const GameLane = ({
-  player,
-  clock,
-  scoreToWin,
-}: {
-  player: SignalSprintPlayer;
-  clock: number;
-  scoreToWin: number;
-}) => {
-  const presentation = BUTTON_PRESENTATION[player.target];
-  const isStunned =
-    player.stunnedUntil !== null && player.stunnedUntil > clock;
-  const feedback =
-    player.lastOutcome && clock - player.lastOutcome.occurredAt < 850
-      ? player.lastOutcome.kind
-      : null;
-  const progress = Math.min(100, (player.score / scoreToWin) * 100);
-  const stateLabel =
-    player.connectionState === "inactive"
-      ? "Out for this round"
-      : player.connectionState === "disconnected"
-        ? "Reconnecting..."
-        : isStunned
-          ? "Stunned"
-          : feedback === "correct"
-            ? "Correct!"
-            : feedback === "wrong"
-              ? "Wrong input"
-              : "Racing";
-
-  return (
-    <article
-      className={`game-lane game-lane--${player.connectionState} ${isStunned ? "game-lane--stunned" : ""}`}
-      data-accent={player.accent}
-    >
-      <div className="lane-heading">
-        <span className="player-number">P{player.playerNumber}</span>
-        <div>
-          <h2>{player.displayName}</h2>
-          <span className="lane-state">{stateLabel}</span>
-        </div>
-        <div className="lane-score">
-          <strong>{player.score}</strong>
-          <span>/ {scoreToWin}</span>
-        </div>
-      </div>
-
-      <div className="lane-play">
-        <div
-          key={`${player.playerId}-${player.lastOutcome?.sequence ?? 0}`}
-          className={`target target--${player.target} ${feedback ? `target--${feedback}` : ""}`}
-          aria-label={`Target ${presentation.label}`}
-        >
-          <span>{presentation.symbol}</span>
-          <strong>{presentation.label}</strong>
-        </div>
-
-        <div className="track-wrap">
-          <div className="track" aria-label={`${player.score} of ${scoreToWin}`}>
-            <div className="track__fill" style={{ width: `${progress}%` }} />
-            <div
-              className="lane-marker"
-              data-player={player.playerNumber}
-              style={{ left: `${progress}%` }}
-              aria-hidden="true"
-            />
-          </div>
-          <div className="lane-meta">
-            <span>Start</span>
-            <span>{player.mistakes} mistakes</span>
-            <span>Signal</span>
-          </div>
-        </div>
-      </div>
-    </article>
-  );
-};
-
 const formatRoundTime = (roundEndsAt: number | null, clock: number) => {
   const remainingMs = Math.max(0, (roundEndsAt ?? clock) - clock);
   return (remainingMs / 1_000).toFixed(1);
@@ -254,6 +213,8 @@ export const App = () => {
   const [connectionMessage, setConnectionMessage] = useState("Connecting...");
   const [room, setRoom] = useState<RoomSnapshot>();
   const [game, setGame] = useState<SignalSprintState>();
+  const [robotAcknowledgements, setRobotAcknowledgements] =
+    useState<RobotAcknowledgements>({});
   const [clock, setClock] = useState(Date.now());
   const [isCreating, setIsCreating] = useState(false);
   const [createError, setCreateError] = useState("");
@@ -311,12 +272,19 @@ export const App = () => {
       setGameError("");
       setPendingAction(undefined);
     };
+    const onPlayerInput = (event: HostPlayerInputEvent) => {
+      setRobotAcknowledgements((current) =>
+        recordRobotAcknowledgement(current, event),
+      );
+      setClock(Date.now());
+    };
 
     hostSocket.on("connect", onConnect);
     hostSocket.on("disconnect", onDisconnect);
     hostSocket.on("connect_error", onConnectError);
     hostSocket.on(HOST_ROOM_STATE_EVENT, onRoomState);
     hostSocket.on(HOST_GAME_STATE_EVENT, onGameState);
+    hostSocket.on(HOST_PLAYER_INPUT_EVENT, onPlayerInput);
     hostSocket.connect();
 
     return () => {
@@ -326,6 +294,7 @@ export const App = () => {
       hostSocket.off("connect_error", onConnectError);
       hostSocket.off(HOST_ROOM_STATE_EVENT, onRoomState);
       hostSocket.off(HOST_GAME_STATE_EVENT, onGameState);
+      hostSocket.off(HOST_PLAYER_INPUT_EVENT, onPlayerInput);
       hostSocket.disconnect();
     };
   }, []);
@@ -385,10 +354,17 @@ export const App = () => {
 
   return (
     <main className={`host-screen host-screen--${phase}`}>
+      <div className="venue-set" aria-hidden="true">
+        <span className="venue-rig venue-rig--left" />
+        <span className="venue-rig venue-rig--right" />
+        <span className="venue-curtain venue-curtain--left" />
+        <span className="venue-curtain venue-curtain--right" />
+        <span className="venue-floor-line" />
+      </div>
       <header className="host-header">
         <div>
-          <p className="eyebrow">Primitive validation minigame</p>
-          <h1>{room ? "Signal Sprint" : "Local party game"}</h1>
+          <p className="eyebrow">Event Rescue // Service Crew</p>
+          <h1>{room ? "Signal Sprint" : "Open the venue"}</h1>
         </div>
         <div className="header-status">
           {room ? <span className="header-room">Room {room.code}</span> : null}
@@ -405,8 +381,12 @@ export const App = () => {
 
       {!room ? (
         <section className="room-start">
-          <div className="room-start__shape" aria-hidden="true" />
-          <p>Create a temporary local room for up to four controllers.</p>
+          <div className="venue-pass" aria-hidden="true">
+            <i /><i /><i />
+          </div>
+          <p>
+            Call in up to four temporary service robots and save tonight's event.
+          </p>
           <button
             type="button"
             onClick={createRoom}
@@ -431,11 +411,12 @@ export const App = () => {
           />
           <section className="lobby-board" aria-label="Signal Sprint lobby">
             <div className="lobby-copy">
-              <p className="section-kicker">Ready room</p>
-              <h2>Match the signal. Reach 15 first.</h2>
+              <p className="section-kicker">Venue call time</p>
+              <h2>Restore every station before doors open.</h2>
               <p>
-                Watch this screen and press the matching controller button.
-                Wrong signals cause a short stun.
+                Match each work cue on your controller. The first crew to 15
+                completed jobs rescues the event; a misroute briefly stuns the
+                robot.
               </p>
             </div>
             <div className="lobby-grid">
@@ -474,17 +455,29 @@ export const App = () => {
         </div>
       ) : phase === "countdown" && game ? (
         <section className="countdown-stage">
-          <p>Round {game.roundId}</p>
+          <p>Venue doors open // Round {game.roundId}</p>
           <strong className="countdown-number">
             {Math.max(1, Math.ceil(((game.countdownEndsAt ?? clock) - clock) / 1_000))}
           </strong>
-          <h2>Get ready</h2>
+          <h2>Crews to stations</h2>
           <div className="countdown-players">
-            {game.players.map((player) => (
-              <span key={player.playerId} data-accent={player.accent}>
-                P{player.playerNumber} {player.displayName}
-              </span>
-            ))}
+            {game.players.map((player) => {
+              const identity = getPlayerIdentity(player.playerNumber);
+              return (
+                <div
+                  key={player.playerId}
+                  data-player={player.playerNumber}
+                  data-identity-colour={identity.colour}
+                >
+                  <ServiceRobot
+                    identity={identity}
+                    presentation={COUNTDOWN_ROBOT_PRESENTATION}
+                    compact
+                  />
+                  <span>P{player.playerNumber} {player.displayName}</span>
+                </div>
+              );
+            })}
           </div>
           {waitingPlayers.length > 0 ? (
             <p>{waitingPlayers.map((player) => player.displayName).join(", ")} will join next round.</p>
@@ -494,23 +487,32 @@ export const App = () => {
         <section className="play-stage">
           <div className="round-bar">
             <div>
-              <span>Round {game.roundId}</span>
-              <strong>Match your signal</strong>
+              <span>Live production // Round {game.roundId}</span>
+              <strong>Route the next cue</strong>
             </div>
             <div className="round-timer" aria-label="Time remaining">
               <strong>{formatRoundTime(game.roundEndsAt, clock)}</strong>
               <span>seconds</span>
             </div>
           </div>
-          <div className="game-lanes" data-player-count={game.players.length}>
-            {game.players.map((player) => (
-              <GameLane
-                key={player.playerId}
-                player={player}
-                clock={clock}
-                scoreToWin={game.scoreToWin}
-              />
-            ))}
+          <div className="event-stations" data-player-count={game.players.length}>
+            {game.players.map((player) => {
+              const presentation = deriveRobotPresentation({
+                phase: game.phase,
+                player,
+                winnerPlayerIds: game.winnerPlayerIds,
+                acknowledgement: robotAcknowledgements[player.playerId],
+                now: clock,
+              });
+              return (
+                <EventStation
+                  key={player.playerId}
+                  player={player}
+                  scoreToWin={game.scoreToWin}
+                  presentation={presentation}
+                />
+              );
+            })}
           </div>
           {waitingPlayers.length > 0 ? (
             <div className="waiting-strip">
@@ -520,9 +522,9 @@ export const App = () => {
         </section>
       ) : game ? (
         <section className="results-stage">
-          <p className="section-kicker">Round {game.roundId} complete</p>
+          <p className="section-kicker">Event report // Round {game.roundId}</p>
           <h2>
-            {game.winnerPlayerIds.length > 1 ? "Joint winners" : "Winner"}
+            {game.winnerPlayerIds.length > 1 ? "Joint rescue crew" : "Venue rescued"}
           </h2>
           <div className="winner-names">
             {game.players
@@ -536,14 +538,35 @@ export const App = () => {
                 (left, right) =>
                   right.score - left.score || left.playerNumber - right.playerNumber,
               )
-              .map((player) => (
-                <article key={player.playerId} data-accent={player.accent}>
-                  <span>P{player.playerNumber}</span>
-                  <strong>{player.displayName}</strong>
-                  <b>{player.score}</b>
-                  <small>{player.mistakes} mistakes</small>
-                </article>
-              ))}
+              .map((player) => {
+                const identity = getPlayerIdentity(player.playerNumber);
+                const presentation = deriveRobotPresentation({
+                  phase: game.phase,
+                  player,
+                  winnerPlayerIds: game.winnerPlayerIds,
+                  acknowledgement: robotAcknowledgements[player.playerId],
+                  now: clock,
+                });
+                return (
+                  <article
+                    key={player.playerId}
+                    data-player={player.playerNumber}
+                    data-identity-colour={identity.colour}
+                  >
+                    <ServiceRobot
+                      identity={identity}
+                      presentation={presentation}
+                      compact
+                    />
+                    <div>
+                      <span>P{player.playerNumber}</span>
+                      <strong>{player.displayName}</strong>
+                      <b>{player.score} jobs</b>
+                      <small>{player.mistakes} misroutes</small>
+                    </div>
+                  </article>
+                );
+              })}
           </div>
           <div className="results-actions">
             <button
@@ -572,9 +595,9 @@ export const App = () => {
       ) : null}
 
       <footer className="host-footer">
-        <span>Signal Sprint is provisional prototype content</span>
+        <span>Temporary Event Rescue prototype</span>
         <strong>{serverUrl}</strong>
-        <span>Server-authoritative scoring and timing</span>
+        <span>Venue control owns scoring and timing</span>
       </footer>
     </main>
   );

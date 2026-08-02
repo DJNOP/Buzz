@@ -2,11 +2,11 @@ import type { ControllerButton } from "@party-game/shared";
 
 export const BUTTON_PRESENTATION: Record<
   ControllerButton,
-  { label: string; symbol: string }
+  { label: string; symbol: string; tone: "action" | "red" | "blue" | "yellow" | "green" }
 > = {
-  primary: { label: "Primary", symbol: "A" },
-  secondary1: { label: "Secondary 1", symbol: "1" },
-  secondary2: { label: "Secondary 2", symbol: "2" },
-  secondary3: { label: "Secondary 3", symbol: "3" },
-  secondary4: { label: "Secondary 4", symbol: "4" },
+  primary: { label: "Action", symbol: "A", tone: "action" },
+  secondary1: { label: "Red", symbol: "1", tone: "red" },
+  secondary2: { label: "Blue", symbol: "2", tone: "blue" },
+  secondary3: { label: "Yellow", symbol: "3", tone: "yellow" },
+  secondary4: { label: "Green", symbol: "4", tone: "green" },
 };

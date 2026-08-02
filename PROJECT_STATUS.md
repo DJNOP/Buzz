@@ -1,79 +1,75 @@
 # Project Status
 
-- **Current phase:** Primitive playable-minigame technical validation
-- **Current milestone:** Roadmap Milestones 1–7 implemented
-- **Last completed task:** Added the first server-authoritative Signal Sprint
-  prototype with a lobby, countdown, timed race, scoring, stuns, results,
-  replay, lifecycle handling, and TV/phone presentation.
+- **Current phase:** Themed Signal Sprint vertical-slice validation
+- **Current milestone:** Roadmap Milestones 1–7 plus the provisional themed
+  presentation slice implemented
+- **Last completed task:** Reframed Signal Sprint as an original temporary
+  Event Rescue venue with four reusable service robots, operational stations,
+  a trusted/authoritative presentation-state model, and a vertical phone
+  controller while preserving every server-authoritative game rule.
 - **Next recommended task:** Run the documented physical two-to-four-player
-  Signal Sprint enjoyment and ergonomics playtest before adding content or a
-  tournament flow.
+  Signal Sprint enjoyment, TV-readability, and controller-ergonomics playtest.
 - **Date last updated:** 2026-08-02
 
 ## Validation summary
 
-The local-network room, five-button controller, reconnection, QR-prefill, and
-manual join foundations remain intact. Signal Sprint passes strict type checking
-for every workspace and 64 automated tests: 4 controller, 52 server, and 8
-shared-protocol/query tests. The test suite uses fake timers for game rules and
-contains no real countdown or round delay.
+The local-network room, five-button input, reconnection, QR-prefill, manual
+join, and Signal Sprint rule foundations remain intact. Strict type checking
+passes for every workspace. The suite now contains 71 passing automated tests:
+5 controller presentation/input tests, 6 host identity/presentation tests, 52
+unchanged server tests, and 8 shared-protocol/query tests.
 
-The live multiplayer smoke scenario passed with real three-second and 30-second
-timer configuration. It covered QR-style and manual joins, two controllers,
-independent targets, correct/wrong inputs, 600 ms stun enforcement, ignored stun
-input, a 15-point early win, replay without reconnecting, a second isolated room,
-mid-round reconnection, and host cleanup.
+The production build and live multiplayer smoke scenario pass. The smoke still
+covers two rooms, QR-style and manual joins, all five paired controls,
+independent targets, correct/wrong input, the exact 600 ms authoritative stun,
+ignored stun input, the 15-point finish, replay, reconnection, room isolation,
+and host cleanup.
 
-In-app browser QA covered the lobby, countdown, one- and four-player active
-layouts, results/replay, and clean direct application consoles. The host fit
-1280×720 without page or lane overflow and a scaled true 1920×1080 iframe showed
-the full lobby. Controller content fit true 390×844, 360×800, and shorter
-390×667 iframe viewports. Replay returned the connected controller to active
-status without showing the join form. Physical multiplayer enjoyment has not
-been tested in this milestone.
+In-app browser QA covered host entry, QR lobby, countdown, active one-, two-,
+and four-player layouts, immediate wrong feedback, authoritative stun, trusted
+input acknowledgement, results, replay, and return to lobby. The host has no
+document overflow at exact 1280×720 or exact 1920×1080 viewport measurements.
+Controller content has no document overflow at exact 390×844, 360×800, or
+390×667 measurements and keeps the complete A plus 1–4 stack visible in active,
+stunned, lobby, and results states. Direct host and controller consoles were
+free of errors and warnings. Temporary viewport QA wrappers were removed.
 
-## Current architecture summary
+## Current presentation and architecture
 
-The npm-workspaces TypeScript system keeps React/Vite host and controller apps,
-the Node.js/Socket.IO server, and shared protocol types separate. `RoomManager`
-still owns rooms, trusted socket/player identity, input pairing, capacity,
-reconnection, and expiry.
+Signal Sprint keeps the existing focused `SignalSprintGame` and protocol. No
+server, shared-protocol, scoring, target, timing, tie, lifecycle, replay, or room
+isolation code changed in this slice.
 
-One `SignalSprintGame` instance per room separately owns the phase, round ID,
-captured participants, targets, scores, mistakes, stun expiry, countdown and
-round deadlines, and winners. The module has injected clock, scheduler, and
-random sources for deterministic tests. Socket handlers only route trusted host
-actions, accepted controller inputs, room lifecycle snapshots, and public game
-updates; clients cannot submit scores, targets, timing, room identity, or player
-identity.
+The host now renders a layered original CSS venue with one operational station
+and one identical neutral service-robot body per participant. Identity is
+redundant and fixed by player number: P1 red/circle, P2 blue/square, P3
+yellow/triangle, and P4 green/diamond. Signal targets remain separate console
+cues. The reusable robot exposes idle, input acknowledgement, correct, wrong,
+stunned, working, winning, and losing presentation states.
 
-The host alone receives targets and complete game state. Controllers receive
-only coarse lobby/get-ready/active/stunned/waiting/results status, and buttons
-are disabled outside an active, non-stunned round. No game engine, generic
-minigame framework, persistence, external artwork, or new dependency was added.
+A small pure host presentation module consumes trusted server-received down
+events for acknowledgement and authoritative game snapshots for correct,
+wrong, stun, working, and result states. Time-derived transient windows prevent
+old or rapid feedback from becoming stuck. Visible state labels preserve the
+same information when motion is reduced.
 
-## Lifecycle behaviour
-
-- Connected players are captured when countdown begins; one player is allowed
-  for development while two to four remains the intended social experience.
-- Reconnecting participants retain score and target during the existing grace
-  period. Expired participants remain inactive in the current round.
-- Late joiners enter the room but wait for the next replay.
-- Replay resets round state while preserving membership; return-to-lobby also
-  preserves the room and QR/manual joining information.
-- Host disconnection closes the room and disposes phase and stun timers.
+The joined controller is now one large round A action above four full-width
+controls in fixed order: 1 RED, 2 BLUE, 3 YELLOW, and 4 GREEN. The underlying
+semantic identifiers, pointer/key pairing, cancellation and focus release,
+haptics, disabled states, reconnect flow, QR/manual joining, and target privacy
+are unchanged.
 
 ## Remaining risks and manual validation
 
-Signal Sprint is a provisional validation game, not final product content or
-branding. Automated correctness and readable browser layouts do not establish
-fun, social clarity, camera-to-TV viewing comfort, controller ergonomics,
-accessibility, perceived latency with four physical phones, or whether players
-want another round. These are the acceptance questions for the next physical
-playtest.
+The Event Rescue world, service robots, button presentation, and Signal Sprint
+content are still provisional validation material rather than final branding or
+production art. CSS/SVG presentation and browser measurements do not establish
+fun, social clarity, viewing comfort on a real television, controller comfort,
+accessibility with real players, perceived latency with four phones, or a desire
+for another round.
 
-Final name, visual identity, final controller presentation, tournament design,
-accessibility standards, distribution, monetisation, engine choice, art/audio
-pipelines, and long-term network-adapter handling remain unresolved. Screen Wake
-Lock, host reconnection, persistence, internet hosting, accounts, additional
-minigames, and production infrastructure remain deferred.
+No external or generated visual assets, new dependency, audio, animation
+engine, generic minigame framework, tournament flow, persistence, hosting, or
+deployment were introduced. Final name, identity, characters, accessibility
+standards, distribution, monetisation, engine choice, and art/audio pipelines
+remain unresolved.

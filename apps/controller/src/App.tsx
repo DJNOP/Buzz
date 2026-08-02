@@ -114,7 +114,7 @@ const ControlButton = ({
       data-button={button}
       type="button"
       disabled={disabled}
-      aria-label={`${label} button`}
+      aria-label={`${symbol} ${label} button`}
       onPointerDown={onPointerDown}
       onPointerUp={onPointerEnd}
       onPointerCancel={(event) => tracker.pointerCancel(event.pointerId)}
@@ -443,7 +443,7 @@ export const App = () => {
         </section>
       ) : (
         <div className="controller-session">
-          <section className="player-identity" data-accent={session.player.accent}>
+          <section className="player-identity" data-player={session.player.number}>
             <span className="player-identity__number">
               P{session.player.number}
             </span>
@@ -469,7 +469,7 @@ export const App = () => {
               disabled={controlsDisabled}
               primary
             />
-            <div className="secondary-grid">
+            <div className="secondary-stack">
               {SECONDARY_BUTTONS.map((presentation) => (
                 <ControlButton
                   key={presentation.button}

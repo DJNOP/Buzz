@@ -28,11 +28,13 @@ The roadmap is deliberately sequential. Complete and evaluate each milestone bef
   safe controller prefilling, manual fallback, and physical local joining are
   implemented and validated.
 - **Milestone 7:** Complete in implementation and technical validation. Signal
-  Sprint provides one primitive server-authoritative minigame with a lobby,
-  countdown, 30-second race, five-button targets, scoring, stuns, results,
-  replay, reconnection-aware participation, and room isolation. It uses React,
-  CSS shapes, Socket.IO, and a focused testable rules module without a game
-  engine or general minigame framework.
+  Sprint provides one server-authoritative minigame with a lobby, countdown,
+  30-second race, five-button targets, scoring, stuns, results, replay,
+  reconnection-aware participation, and room isolation. Its first provisional
+  themed vertical slice adds an original Event Rescue venue, reusable service
+  robots and stations, explicit presentation states, and a vertical phone
+  controller without changing game rules or introducing external assets, an
+  engine, or a general minigame framework.
 
 The next gate is Milestone 8: run the documented physical two-to-four-player
 Signal Sprint playtest. Technical correctness does not establish enjoyment,
