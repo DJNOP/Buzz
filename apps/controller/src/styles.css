@@ -127,6 +127,17 @@ input {
   text-transform: uppercase;
 }
 
+.join-panel__link-note {
+  margin: -0.25rem 0 0;
+  padding: 0.7rem 0.8rem;
+  border-left: 0.22rem solid #8f83ff;
+  border-radius: 0.55rem;
+  background: rgb(143 131 255 / 12%);
+  color: #cfd3ff;
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
 .join-panel h1 {
   margin: 0;
   font-size: clamp(2rem, 9vw, 3rem);

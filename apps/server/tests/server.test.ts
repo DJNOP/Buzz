@@ -10,6 +10,7 @@ import {
   CONTROLLER_RECONNECT_EVENT,
   CONTROLLER_ROOM_CLOSED_EVENT,
   HOST_CREATE_ROOM_EVENT,
+  HOST_GET_NETWORK_ADDRESSES_EVENT,
   HOST_PLAYER_INPUT_EVENT,
   HOST_ROOM_STATE_EVENT,
   type ClientToServerEvents,
@@ -19,6 +20,8 @@ import {
   type HostPlayerInputEvent,
   type InterServerEvents,
   type JoinRoomResult,
+  type HostNetworkAddressesResult,
+  type LocalNetworkAddress,
   type ReconnectControllerResult,
   type RoomClosedNotice,
   type RoomSnapshot,
@@ -45,7 +48,9 @@ interface RunningServer {
 const clients: TypedClient[] = [];
 let runningServer: RunningServer | undefined;
 
-const startServer = async (): Promise<RunningServer> => {
+const startServer = async (
+  networkAddresses: LocalNetworkAddress[] = [],
+): Promise<RunningServer> => {
   let roomSequence = 0;
   let playerSequence = 0;
   let tokenSequence = 0;
@@ -58,7 +63,10 @@ const startServer = async (): Promise<RunningServer> => {
     reconnectGraceMs: 5_000,
   });
   const httpServer = createServer();
-  const { io } = createRealtimeServer(httpServer, { roomManager });
+  const { io } = createRealtimeServer(httpServer, {
+    roomManager,
+    getNetworkAddresses: () => networkAddresses,
+  });
 
   await new Promise<void>((resolve, reject) => {
     httpServer.once("error", reject);
@@ -96,6 +104,11 @@ const connectClient = async (url: string, role: ConnectionRole) => {
 const createRoom = (host: TypedClient) =>
   new Promise<CreateRoomResult>((resolve) =>
     host.emit(HOST_CREATE_ROOM_EVENT, resolve),
+  );
+
+const getNetworkAddresses = (client: TypedClient) =>
+  new Promise<HostNetworkAddressesResult>((resolve) =>
+    client.emit(HOST_GET_NETWORK_ADDRESSES_EVENT, resolve),
   );
 
 const joinRoom = (client: TypedClient, roomCode: string, displayName: string) =>
@@ -140,6 +153,28 @@ afterEach(async () => {
 });
 
 describe("multiplayer Socket.IO transport", () => {
+  it("exposes only detected local addresses to hosts", async () => {
+    const detected = [
+      { address: "192.168.1.24", isPrivate: true },
+      { address: "10.0.0.8", isPrivate: true },
+    ];
+    const server = await startServer(detected);
+    const host = await connectClient(server.url, CONNECTION_ROLES.host);
+    const controller = await connectClient(
+      server.url,
+      CONNECTION_ROLES.controller,
+    );
+
+    await expect(getNetworkAddresses(host)).resolves.toEqual({
+      ok: true,
+      addresses: detected,
+    });
+    await expect(getNetworkAddresses(controller)).resolves.toMatchObject({
+      ok: false,
+      error: { code: "not_authorized" },
+    });
+  });
+
   it("creates a room and joins a controller", async () => {
     const server = await startServer();
     const host = await connectClient(server.url, CONNECTION_ROLES.host);

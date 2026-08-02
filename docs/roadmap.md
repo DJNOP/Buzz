@@ -24,5 +24,6 @@ The roadmap is deliberately sequential. Complete and evaluate each milestone bef
 - **Milestone 3:** Complete; all five semantic buttons emit paired typed phases with duplicate/stuck-input protections.
 - **Milestone 4:** Complete; hosts create isolated rooms for up to four distinctly identified players.
 - **Milestone 5:** Complete; capacity, disconnection, 20-second controller reconnection, cleanup, and core automated tests are implemented and validated.
+- **Milestone 6:** Complete in implementation and automated/browser validation; local QR generation, selectable detected addresses, safe controller prefilling, and manual fallback are implemented. Real iPhone/Android camera scanning remains the acceptance test.
 
-Milestone 6 (QR-code joining) has not started. Conduct the documented manual multi-controller test and review this foundation before beginning it.
+Run the documented real-camera and multi-controller acceptance tests before beginning Milestone 7 (a primitive playable minigame).

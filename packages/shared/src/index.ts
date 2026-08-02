@@ -8,6 +8,7 @@ export {
   CONTROLLER_ROOM_CLOSED_EVENT,
   DISPLAY_NAME_MAX_LENGTH,
   HOST_CREATE_ROOM_EVENT,
+  HOST_GET_NETWORK_ADDRESSES_EVENT,
   HOST_PLAYER_INPUT_EVENT,
   HOST_ROOM_STATE_EVENT,
   PLAYER_ACCENTS,
@@ -25,6 +26,14 @@ export {
   normalizeRoomCode,
 } from "./protocol.js";
 
+export {
+  DEFAULT_CONTROLLER_PORT,
+  ROOM_QUERY_PARAMETER,
+  buildControllerJoinUrl,
+  parseRoomQuery,
+  removeRoomQueryFromUrl,
+} from "./join-url.js";
+
 export type {
   ButtonPhase,
   ClientToServerEvents,
@@ -36,10 +45,12 @@ export type {
   CreateRoomErrorCode,
   CreateRoomResult,
   HostPlayerInputEvent,
+  HostNetworkAddressesResult,
   InterServerEvents,
   JoinRoomErrorCode,
   JoinRoomRequest,
   JoinRoomResult,
+  LocalNetworkAddress,
   PlayerAccent,
   PlayerConnectionState,
   PlayerInputDiagnostic,
@@ -53,3 +64,5 @@ export type {
   ServerToClientEvents,
   SocketData,
 } from "./protocol.js";
+
+export type { RoomQueryResult } from "./join-url.js";

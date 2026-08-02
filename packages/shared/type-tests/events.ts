@@ -1,6 +1,7 @@
 import {
   CONTROLLER_INPUT_EVENT,
   CONTROLLER_JOIN_ROOM_EVENT,
+  HOST_GET_NETWORK_ADDRESSES_EVENT,
   HOST_PLAYER_INPUT_EVENT,
   type ClientToServerEvents,
   type ControllerInputPayload,
@@ -20,6 +21,15 @@ const joinRoom: ClientToServerEvents[typeof CONTROLLER_JOIN_ROOM_EVENT] = (
   acknowledge({
     ok: false,
     error: { code: "room_not_found", message: "Room not found." },
+  });
+};
+
+const readNetworkAddresses: ClientToServerEvents[
+  typeof HOST_GET_NETWORK_ADDRESSES_EVENT
+] = (acknowledge) => {
+  acknowledge({
+    ok: true,
+    addresses: [{ address: "192.168.1.24", isPrivate: true }],
   });
 };
 
@@ -58,6 +68,7 @@ const invalidPhase: ControllerInputPayload = {
 
 void sendInput;
 void joinRoom;
+void readNetworkAddresses;
 void receiveInput;
 void validHostEvent;
 void invalidButton;

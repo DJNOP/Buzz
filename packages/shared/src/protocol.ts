@@ -127,7 +127,21 @@ export interface RoomClosedNotice {
   message: string;
 }
 
+export interface LocalNetworkAddress {
+  address: string;
+  isPrivate: boolean;
+}
+
+export type HostNetworkAddressesResult =
+  | { ok: true; addresses: LocalNetworkAddress[] }
+  | {
+      ok: false;
+      error: ProtocolError<"not_authorized">;
+    };
+
 export const HOST_CREATE_ROOM_EVENT = "host:create-room" as const;
+export const HOST_GET_NETWORK_ADDRESSES_EVENT =
+  "host:get-network-addresses" as const;
 export const HOST_ROOM_STATE_EVENT = "host:room-state" as const;
 export const HOST_PLAYER_INPUT_EVENT = "host:player-input" as const;
 export const CONTROLLER_JOIN_ROOM_EVENT = "controller:join-room" as const;
@@ -139,6 +153,9 @@ type Acknowledge<Result> = (result: Result) => void;
 
 export interface ClientToServerEvents {
   [HOST_CREATE_ROOM_EVENT]: (acknowledge: Acknowledge<CreateRoomResult>) => void;
+  [HOST_GET_NETWORK_ADDRESSES_EVENT]: (
+    acknowledge: Acknowledge<HostNetworkAddressesResult>,
+  ) => void;
   [CONTROLLER_JOIN_ROOM_EVENT]: (
     request: JoinRoomRequest,
     acknowledge: Acknowledge<JoinRoomResult>,

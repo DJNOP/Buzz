@@ -1,9 +1,13 @@
 import { useEffect, useState } from "react";
+import { QRCodeSVG } from "qrcode.react";
 import {
+  buildControllerJoinUrl,
   HOST_CREATE_ROOM_EVENT,
+  HOST_GET_NETWORK_ADDRESSES_EVENT,
   HOST_PLAYER_INPUT_EVENT,
   HOST_ROOM_STATE_EVENT,
   type HostPlayerInputEvent,
+  type LocalNetworkAddress,
   type PublicPlayer,
   type RoomSnapshot,
 } from "@party-game/shared";
@@ -11,6 +15,25 @@ import { BUTTON_PRESENTATION } from "./button-presentation";
 import { hostSocket, serverUrl } from "./socket";
 
 type ConnectionState = "connecting" | "connected" | "disconnected" | "error";
+
+const copyText = async (value: string) => {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(value);
+    return;
+  }
+
+  const textArea = document.createElement("textarea");
+  textArea.value = value;
+  textArea.style.position = "fixed";
+  textArea.style.opacity = "0";
+  document.body.append(textArea);
+  textArea.select();
+  const copied = document.execCommand("copy");
+  textArea.remove();
+  if (!copied) {
+    throw new Error("Copy command was unavailable.");
+  }
+};
 
 const formatTime = (timestamp: number) =>
   new Intl.DateTimeFormat(undefined, {
@@ -114,11 +137,34 @@ export const App = () => {
   const [room, setRoom] = useState<RoomSnapshot>();
   const [isCreating, setIsCreating] = useState(false);
   const [createError, setCreateError] = useState("");
+  const [networkAddresses, setNetworkAddresses] = useState<
+    LocalNetworkAddress[] | null
+  >(null);
+  const [selectedAddress, setSelectedAddress] = useState("");
+  const [copyStatus, setCopyStatus] = useState("");
 
   useEffect(() => {
+    let active = true;
+
+    const readNetworkAddresses = () => {
+      hostSocket.emit(HOST_GET_NETWORK_ADDRESSES_EVENT, (result) => {
+        if (!active) {
+          return;
+        }
+        const addresses = result.ok ? result.addresses : [];
+        setNetworkAddresses(addresses);
+        setSelectedAddress((current) =>
+          addresses.some((candidate) => candidate.address === current)
+            ? current
+            : (addresses[0]?.address ?? ""),
+        );
+      });
+    };
+
     const onConnect = () => {
       setConnectionState("connected");
       setConnectionMessage("Connected to room server");
+      readNetworkAddresses();
     };
     const onDisconnect = () => {
       setConnectionState("disconnected");
@@ -151,6 +197,7 @@ export const App = () => {
     hostSocket.connect();
 
     return () => {
+      active = false;
       hostSocket.off("connect", onConnect);
       hostSocket.off("disconnect", onDisconnect);
       hostSocket.off("connect_error", onConnectError);
@@ -177,6 +224,23 @@ export const App = () => {
     const number = index + 1;
     return room?.players.find((player) => player.number === number) ?? number;
   });
+
+  const controllerUrl =
+    room && selectedAddress
+      ? buildControllerJoinUrl(selectedAddress, room.code)
+      : "";
+
+  const copyControllerUrl = async () => {
+    if (!controllerUrl) {
+      return;
+    }
+    try {
+      await copyText(controllerUrl);
+      setCopyStatus("Link copied");
+    } catch {
+      setCopyStatus("Copy unavailable — select the link below");
+    }
+  };
 
   return (
     <main className="host-screen">
@@ -209,11 +273,87 @@ export const App = () => {
           {createError ? <p className="error-message">{createError}</p> : null}
         </section>
       ) : (
-        <>
-          <section className="room-banner" aria-label="Current room code">
-            <span>Controller room</span>
-            <strong>{room.code}</strong>
-            <p>Open the controller page and enter this code.</p>
+        <div className="room-session">
+          <section className="join-card" aria-label="Join this room">
+            <div className="room-banner" aria-label="Current room code">
+              <span>Controller room</span>
+              <strong>{room.code}</strong>
+              <p>Scan to join, or enter this code manually.</p>
+            </div>
+
+            {networkAddresses === null ? (
+              <p className="network-message" role="status">
+                Finding this computer on the local network…
+              </p>
+            ) : controllerUrl ? (
+              <>
+                <div className="qr-frame">
+                  <QRCodeSVG
+                    value={controllerUrl}
+                    size={320}
+                    level="M"
+                    marginSize={4}
+                    bgColor="#ffffff"
+                    fgColor="#111426"
+                    title={`Join room ${room.code}`}
+                  />
+                </div>
+
+                {networkAddresses.length > 1 ? (
+                  <label className="address-select">
+                    Network address
+                    <select
+                      value={selectedAddress}
+                      onChange={(event) => {
+                        setSelectedAddress(event.target.value);
+                        setCopyStatus("");
+                      }}
+                    >
+                      {networkAddresses.map((candidate) => (
+                        <option key={candidate.address} value={candidate.address}>
+                          {candidate.address}
+                          {candidate.isPrivate
+                            ? " — private network"
+                            : " — other network"}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                ) : null}
+
+                <div className="controller-link">
+                  <label htmlFor="controller-url">Controller link</label>
+                  <div>
+                    <input
+                      id="controller-url"
+                      value={controllerUrl}
+                      readOnly
+                      onFocus={(event) => event.currentTarget.select()}
+                    />
+                    <button type="button" onClick={copyControllerUrl}>
+                      Copy link
+                    </button>
+                  </div>
+                  <span role="status" aria-live="polite">
+                    {copyStatus}
+                  </span>
+                </div>
+
+                <p className="network-note">
+                  Both devices must be on the same local network. The QR code is
+                  generated here and contains only this controller link.
+                </p>
+              </>
+            ) : (
+              <div className="network-fallback" role="status">
+                <strong>No usable local network address was detected.</strong>
+                <p>
+                  Keep using room code {room.code}. Find this computer’s local
+                  IPv4 address and open the controller page manually on the same
+                  network.
+                </p>
+              </div>
+            )}
           </section>
 
           <section className="player-grid" aria-label="Player slots">
@@ -225,7 +365,7 @@ export const App = () => {
               ),
             )}
           </section>
-        </>
+        </div>
       )}
 
       <footer className="diagnostics-footer">

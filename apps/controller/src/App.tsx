@@ -14,6 +14,8 @@ import {
   CONTROLLER_ROOM_CLOSED_EVENT,
   DISPLAY_NAME_MAX_LENGTH,
   normalizeRoomCode,
+  parseRoomQuery,
+  removeRoomQueryFromUrl,
   type ControllerButton,
   type ControllerSession,
   type RoomClosedNotice,
@@ -32,6 +34,17 @@ import {
 import { controllerSocket, serverUrl } from "./socket";
 
 type ConnectionState = "connecting" | "connected" | "disconnected" | "error";
+
+const INVALID_ROOM_LINK_MESSAGE =
+  "This join link has an invalid room code. Enter the code shown on the host.";
+
+const clearConsumedRoomQuery = () => {
+  const nextUrl = removeRoomQueryFromUrl(window.location.href);
+  const currentUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+  if (nextUrl !== currentUrl) {
+    window.history.replaceState(window.history.state, "", nextUrl);
+  }
+};
 
 interface ControlButtonProps {
   presentation: ButtonPresentation;
@@ -98,13 +111,23 @@ const ControlButton = ({
 };
 
 export const App = () => {
+  const [initialRoomQuery] = useState(() =>
+    parseRoomQuery(window.location.search),
+  );
   const [connectionState, setConnectionState] =
     useState<ConnectionState>("connecting");
   const [connectionMessage, setConnectionMessage] = useState("Connecting…");
   const [session, setSession] = useState<ControllerSession>();
-  const [roomCode, setRoomCode] = useState("");
+  const [roomCode, setRoomCode] = useState(() =>
+    initialRoomQuery.status === "valid" ? initialRoomQuery.roomCode : "",
+  );
   const [displayName, setDisplayName] = useState("");
-  const [joinError, setJoinError] = useState("");
+  const [joinError, setJoinError] = useState(() =>
+    initialRoomQuery.status === "invalid" ? INVALID_ROOM_LINK_MESSAGE : "",
+  );
+  const [hasPrefilledRoom, setHasPrefilledRoom] = useState(
+    initialRoomQuery.status === "valid",
+  );
   const [isJoining, setIsJoining] = useState(false);
   const [isRecovering, setIsRecovering] = useState(false);
   const [activeButtons, setActiveButtons] = useState<ReadonlySet<ControllerButton>>(
@@ -172,14 +195,26 @@ export const App = () => {
               roomCode: result.session.roomCode,
               reconnectionToken: result.session.reconnectionToken,
             });
+            clearConsumedRoomQuery();
+            setHasPrefilledRoom(false);
             return;
           }
 
           clearStoredSession();
           sessionRef.current = undefined;
           setSession(undefined);
-          setRoomCode(stored.roomCode);
-          setJoinError(result.error.message);
+          if (initialRoomQuery.status === "valid") {
+            setRoomCode(initialRoomQuery.roomCode);
+            setHasPrefilledRoom(true);
+            setJoinError(result.error.message);
+          } else {
+            setRoomCode(stored.roomCode);
+            setJoinError(
+              initialRoomQuery.status === "invalid"
+                ? INVALID_ROOM_LINK_MESSAGE
+                : result.error.message,
+            );
+          }
           setConnectionMessage("Connected — join a room");
         },
       );
@@ -236,7 +271,7 @@ export const App = () => {
       document.removeEventListener("visibilitychange", onVisibilityChange);
       controllerSocket.disconnect();
     };
-  }, [tracker]);
+  }, [initialRoomQuery, tracker]);
 
   const joinRoom = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -261,6 +296,8 @@ export const App = () => {
             roomCode: result.session.roomCode,
             reconnectionToken: result.session.reconnectionToken,
           });
+          clearConsumedRoomQuery();
+          setHasPrefilledRoom(false);
           return;
         }
         setJoinError(result.error.message);
@@ -290,15 +327,22 @@ export const App = () => {
             <p className="join-panel__kicker">Join the shared screen</p>
             <h1>{isRecovering ? "Restoring player…" : "Enter room"}</h1>
           </div>
+          {hasPrefilledRoom ? (
+            <p className="join-panel__link-note">
+              Room code added from the join link. Enter your name to continue.
+            </p>
+          ) : null}
           <form onSubmit={joinRoom}>
             <label>
               Room code
               <input
                 name="roomCode"
                 value={roomCode}
-                onChange={(event) =>
-                  setRoomCode(event.target.value.toUpperCase().slice(0, 4))
-                }
+                onChange={(event) => {
+                  setRoomCode(event.target.value.toUpperCase().slice(0, 4));
+                  setHasPrefilledRoom(false);
+                  setJoinError("");
+                }}
                 autoComplete="off"
                 autoCapitalize="characters"
                 spellCheck={false}
@@ -319,6 +363,7 @@ export const App = () => {
                 maxLength={DISPLAY_NAME_MAX_LENGTH}
                 placeholder="Player name"
                 disabled={isRecovering}
+                autoFocus={initialRoomQuery.status === "valid"}
                 required
               />
             </label>

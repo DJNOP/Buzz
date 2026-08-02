@@ -1,5 +1,6 @@
 import { io } from "socket.io-client";
 import {
+  buildControllerJoinUrl,
   CONNECTION_ROLES,
   CONTROLLER_BUTTONS,
   CONTROLLER_INPUT_EVENT,
@@ -7,8 +8,10 @@ import {
   CONTROLLER_RECONNECT_EVENT,
   CONTROLLER_ROOM_CLOSED_EVENT,
   HOST_CREATE_ROOM_EVENT,
+  HOST_GET_NETWORK_ADDRESSES_EVENT,
   HOST_PLAYER_INPUT_EVENT,
   HOST_ROOM_STATE_EVENT,
+  parseRoomQuery,
 } from "@party-game/shared";
 
 const serverUrl = process.env.SMOKE_SERVER_URL ?? "http://127.0.0.1:3001";
@@ -101,11 +104,47 @@ try {
   const roomTwo = roomTwoResult.room;
   assert(roomOne.code !== roomTwo.code, "Two hosts received the same room code.");
 
+  const networkResult = await acknowledge(
+    hostOne,
+    HOST_GET_NETWORK_ADDRESSES_EVENT,
+  );
+  assert(networkResult.ok === true, "Host could not read detected network addresses.");
+  assert(
+    networkResult.addresses.length > 0,
+    "No usable LAN address was detected for QR smoke validation.",
+  );
+  const selectedAddress = networkResult.addresses[0].address;
+  const controllerJoinUrl = buildControllerJoinUrl(
+    selectedAddress,
+    roomOne.code,
+  );
+  const parsedRoomQuery = parseRoomQuery(new URL(controllerJoinUrl).search);
+  assert(
+    parsedRoomQuery.status === "valid" &&
+      parsedRoomQuery.roomCode === roomOne.code,
+    "The generated controller URL did not preserve the room code.",
+  );
+  const controllerQueryResponse = await fetch(
+    `${controllerUrl}/?room=${encodeURIComponent(roomOne.code)}`,
+  );
+  assert(
+    controllerQueryResponse.ok,
+    `Controller query route returned HTTP ${controllerQueryResponse.status}.`,
+  );
+  assert(
+    parseRoomQuery("?room=O0I1").status === "invalid",
+    "An invalid QR room query was accepted.",
+  );
+  assert(
+    parseRoomQuery("").status === "missing",
+    "A missing QR room query did not preserve manual joining.",
+  );
+
   const controllerOne = await connect(CONNECTION_ROLES.controller);
   const controllerTwo = await connect(CONNECTION_ROLES.controller);
   const sessionOne = expectSuccess(
     await acknowledge(controllerOne, CONTROLLER_JOIN_ROOM_EVENT, {
-      roomCode: roomOne.code,
+      roomCode: parsedRoomQuery.roomCode,
       displayName: "Smoke One",
     }),
     "First controller join",
@@ -245,6 +284,15 @@ try {
       {
         http: { host: hostResponse.status, controller: controllerResponse.status },
         roomCreation: [roomOne.code, roomTwo.code],
+        qrJoining: {
+          detectedAddresses: networkResult.addresses,
+          selectedAddress,
+          controllerJoinUrl,
+          queryRouteStatus: controllerQueryResponse.status,
+          prefilledRoomCode: parsedRoomQuery.roomCode,
+          invalidQueryRejected: true,
+          manualJoinPreserved: true,
+        },
         joinedControllers: 2,
         fiveButtonPhases: receivedPhases,
         invalidRoomRejected: invalidJoin.error.code,

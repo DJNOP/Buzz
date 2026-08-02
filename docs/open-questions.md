@@ -19,6 +19,7 @@ These decisions are intentionally unresolved. Add evidence, constraints, and opt
 ## Access and distribution
 
 - Should rooms remain local-network-only or become internet-hosted?
+- How should a later product distinguish physical, VPN, and virtual adapters when several plausible local addresses exist?
 - What is the long-term distribution platform?
 - What, if any, is the monetisation model?
 - Which smart-TV platforms, if any, should be prioritised?

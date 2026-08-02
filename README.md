@@ -8,30 +8,31 @@ The product is intended to be family-friendly and still entertaining for adults 
 
 ## Current state
 
-Roadmap Milestones 1–5 are implemented:
+Roadmap Milestones 1–6 are implemented:
 
-- A real phone has successfully connected over local Wi-Fi and produced exactly one low-latency host event per deliberate primary-button press, including rapid presses.
-- A host can create one temporary four-character room code.
-- Two to four distinctly identified controllers can join the room.
-- Each controller has one large primary action and four smaller labelled secondary controls.
-- Every control sends typed `down` and `up` phases to only its own room's host.
-- The host shows four player slots, connection state, latest input, valid-phase count, and diagnostic receipt time.
-- Full rooms, invalid joins, duplicate names, disconnects, temporary reconnection, grace expiry, and host room closure are handled.
+- A real phone successfully connected over local Wi-Fi and produced exactly one low-latency host event per deliberate primary-button press, including rapid presses.
+- A host creates one temporary four-character room code for up to four distinctly identified controllers.
+- Every controller has one large primary action and four smaller labelled secondary controls.
+- Typed `down` and `up` phases reach only the controller's own room host.
+- Capacity, invalid joins, duplicate names, disconnection, 20-second reconnection, grace expiry, isolation, and host closure are handled.
+- The host detects suitable local IPv4 addresses and generates a local SVG QR code containing a controller URL and the room code.
+- A scanned controller link prefills the room code but still requires a display name and server-validated join.
+- Manual room-code entry remains fully supported.
 
-The current interface remains a technical visualizer. It contains no minigame, scoring, tournament flow, artwork, QR joining, matchmaking, accounts, database, or cloud service.
+The current interface remains a technical visualizer. It contains no minigame, scoring, tournament flow, artwork, matchmaking, accounts, database, deployment, or cloud service.
 
 ## Repository layout
 
 ```text
 apps/
-  controller/   React/Vite join flow and five-button phone controller
-  host/         React/Vite room and player diagnostic display
-  server/       Node.js/Socket.IO transport and in-memory room authority
+  controller/   React/Vite URL-prefilled join flow and five-button controller
+  host/         React/Vite QR join panel and four-player diagnostic display
+  server/       Socket.IO room transport and testable LAN address discovery
 packages/
-  shared/       Typed room, player, session, and input protocol
+  shared/       Typed protocol plus controller join-URL/query utilities
 scripts/
   dev.mjs                    Minimal multi-process development launcher
-  smoke-multiplayer.mjs      Reproducible multiplayer smoke scenario
+  smoke-multiplayer.mjs      Reproducible QR and multiplayer smoke scenario
 ```
 
 The root uses native npm workspaces without a monorepo orchestration framework.
@@ -49,31 +50,28 @@ npm.cmd test
 npm.cmd run build
 ```
 
-No formatter or linter is included. The current quality gates are strict TypeScript compilation, Vitest unit/integration tests, production builds, source-safety checks, and the smoke scenario.
+No formatter or linter is included. The current quality gates are strict TypeScript compilation, Vitest unit/integration tests, production builds, source-safety checks, browser QA, and the smoke scenario.
+
+The host uses `qrcode.react` 4.2.0, a focused zero-dependency React renderer with built-in TypeScript declarations. It renders the join QR locally as SVG; no room code, URL, or other data is sent to a QR service.
 
 ## Run on the local network
 
 1. Connect the computer and controllers to the same trusted private Wi-Fi or wired network.
-2. In PowerShell at the repository root, run:
-
-   ```powershell
-   ipconfig
-   ```
-
-3. Under the active **Wireless LAN adapter Wi-Fi** or **Ethernet adapter**, note the `IPv4 Address`. Ignore disconnected, VPN, virtual-machine, and loopback adapters.
-4. Start the server and both browser applications:
+2. At the repository root, start the server and both browser applications:
 
    ```powershell
    npm.cmd run dev
    ```
 
-5. Open the host on the computer at [http://localhost:5173](http://localhost:5173), then select **Create room**.
-6. On each controller device or isolated browser context, open `http://<computer-ip>:5174` and enter the host's code plus a unique short display name.
+3. Open the host at [http://localhost:5173](http://localhost:5173) and select **Create room**.
+4. Scan the displayed QR code with a phone camera, enter a display name, and join.
+5. If several addresses are detected, use the host's selector to try the address associated with the shared local network.
+6. As a fallback, open `http://<computer-ip>:5174` manually and enter the prominent room code.
 7. Stop the development stack with `Ctrl+C` when testing is finished.
 
-The host, controller, and server use ports `5173`, `5174`, and `3001`. Browser clients derive the server hostname from the page URL, so no current machine IP is stored in source.
+The host, controller, and server use ports `5173`, `5174`, and `3001`. Address discovery reads active Node.js network-interface data; it does not assume Wi-Fi, hard-code this computer's IP address, or change firewall/network settings.
 
-Windows Defender Firewall did not block the first successful real-phone test. On another machine or network, Windows may ask whether Node.js can accept connections; allow it only on **Private networks**. The project never changes firewall settings automatically.
+Windows Defender Firewall did not block the first successful real-phone test. On another machine or network, Windows may ask whether Node.js can accept connections; allow it only on **Private networks**.
 
 ## Automated multiplayer smoke test
 
@@ -83,24 +81,35 @@ With `npm.cmd run dev` already running in one PowerShell window, run this in a s
 npm.cmd run smoke
 ```
 
-The scenario checks both browser pages, two room creations, two controllers in one room, all five buttons with paired phases, invalid-room rejection, four-player capacity, fifth-player rejection, cross-room isolation, controller replacement/reconnection, and host-triggered room closure.
+The scenario checks both pages, detected address delivery, controller URL construction, the query route, QR-prefilled and manual joining, invalid queries, two rooms, all five paired controls, invalid/full joins, cross-room isolation, controller reconnection, and host-triggered closure.
 
-## Manual multiplayer test
+## Manual QR acceptance test
 
-Use a combination of physical phones, different browsers, normal windows, and private/incognito windows. Each browser storage context represents one controller. Multiple normal tabs in the same browser profile share the same reconnection token, so use an incognito/private window, another browser profile, or another device for each additional simulated player.
+1. Start the development stack with `npm.cmd run dev`.
+2. Open [http://localhost:5173](http://localhost:5173) and create a room.
+3. Scan the host QR code with an iPhone or Android camera.
+4. Confirm the controller page opens at the displayed local URL.
+5. Confirm the room code is prefilled and the display-name field is prioritized.
+6. Enter a unique name, join, and confirm the correct host player slot appears.
+7. Press every control and confirm the host reports the correct player, semantic button, `down`, and `up`.
+8. Open the controller page manually on another device/context and join using only the room code.
+9. If the host shows several detected addresses, select each plausible local address and confirm the QR and displayed URL update; use the one shared by the phone's network.
+10. Disable Wi-Fi on the phone or connect it to another network and scan again. Confirm joining fails as a network reachability issue, then return both devices to the same network. Cross-network and internet joining are not supported.
 
-1. Create a room on the host and confirm four empty numbered slots appear.
-2. Join Player 1 from a phone using a unique display name.
-3. Join Players 2–4 from other phones or isolated browser contexts.
-4. Confirm every slot shows player number, name, accent marker, and connected state.
-5. Attempt a fifth join and confirm the controller sees a friendly full-room message.
-6. On every controller, press and hold each control, then release it. Confirm the host reports one `down` and one `up`, the correct semantic button, and the correct player.
-7. Try simultaneous and rapid presses on different controllers. Confirm events stay in their room and counts remain consistent.
-8. Reload one controller or briefly disable its network. The host should show it as disconnected, then restore the same number, name, accent, and player ID when it reconnects within 20 seconds.
-9. Disconnect a controller for more than 20 seconds. Confirm its slot becomes empty and a new controller can use the freed number.
-10. Close or reload the host. Connected controllers should be told that the room closed and return to the join screen; host reconnection is deliberately unsupported.
+Real-camera scanning is the remaining acceptance test. Do not treat automated QR rendering or browser navigation as proof that every camera, display distance, guest network, VPN, or firewall configuration works.
 
-The reconnection token is a random, private prototype capability stored in that browser's local storage. It is not an account, authentication system, or durable session. Rooms and tokens disappear whenever the server restarts.
+## Manual multiplayer and reconnection checks
+
+Use separate physical devices, browser profiles, or private/incognito contexts for additional simulated players. Normal tabs in one browser profile share the same private reconnection token.
+
+1. Join Players 1–4 and confirm every numbered slot, name, accent, and connection state.
+2. Attempt a fifth join and confirm the friendly full-room message.
+3. Try simultaneous and rapid presses on different controllers and confirm counts remain isolated.
+4. Reload or briefly disable one controller's network and confirm restoration to the same identity within 20 seconds.
+5. Disconnect for more than 20 seconds and confirm the slot becomes available.
+6. Close or reload the host and confirm controllers return to joining with a room-closed notice.
+
+The reconnection token is a random private capability stored in that browser's local storage. It is not included in QR links, is not an account or authentication system, and disappears with the in-memory room whenever the server restarts.
 
 Screen Wake Lock remains deferred. Keep phone screens awake manually during longer tests.
 
@@ -108,15 +117,15 @@ Screen Wake Lock remains deferred. Keep phone screens awake manually during long
 
 - The shared display remains the centre of attention; phone information stays minimal.
 - The standard controller uses semantic identifiers `primary`, `secondary1`, `secondary2`, `secondary3`, and `secondary4`.
-- Button colours are presentation configuration, not protocol identity; every secondary control also has a visible number and label.
-- Player identity always includes player number and display name in addition to a temporary accent marker.
-- QR joining, minigames, game engines, accounts, online matchmaking, native applications, analytics, advertising, and cloud infrastructure remain deferred.
+- Button colours remain presentation configuration; controls and players never rely on colour alone.
+- Local QR joining and short manual room codes coexist.
+- Internet hosting, minigames, game engines, accounts, online matchmaking, native applications, analytics, advertising, and cloud infrastructure remain deferred.
 
 ## Documentation
 
 - [Project status](PROJECT_STATUS.md) — current phase, completed milestones, next step, and known issues.
 - [Product](docs/product.md) — product vision, experience principles, MVP boundaries, and originality requirements.
-- [Architecture](docs/architecture.md) — room authority, transport boundaries, reconnection, cleanup, and protocol behaviour.
+- [Architecture](docs/architecture.md) — authority, address discovery, QR construction, reconnection, and protocol behaviour.
 - [Roadmap](docs/roadmap.md) — ordered, evidence-driven milestones.
 - [Decisions](docs/decisions.md) — accepted constraints and provisional technical decisions.
 - [Open questions](docs/open-questions.md) — unresolved product, platform, accessibility, and production choices.
@@ -124,4 +133,4 @@ Screen Wake Lock remains deferred. Keep phone screens awake manually during long
 
 ## Originality
 
-The product must use original names, worlds, characters, assets, presentation, controller styling, and independently designed minigames. Existing game brands and their protected creative expression must not appear in or be copied by the product. The current controller uses temporary original styling and a two-by-two secondary layout; its final palette, shapes, arrangement, and terminology remain open product decisions.
+The product must use original names, worlds, characters, assets, presentation, controller styling, and independently designed minigames. Existing game brands and their protected creative expression must not appear in or be copied by the product. The QR panel uses a neutral, unbranded presentation without decorative overlays that could reduce scan reliability.

@@ -7,6 +7,7 @@ import {
   CONTROLLER_RECONNECT_EVENT,
   CONTROLLER_ROOM_CLOSED_EVENT,
   HOST_CREATE_ROOM_EVENT,
+  HOST_GET_NETWORK_ADDRESSES_EVENT,
   HOST_PLAYER_INPUT_EVENT,
   HOST_ROOM_STATE_EVENT,
   isConnectionAuth,
@@ -15,15 +16,18 @@ import {
   type ClientToServerEvents,
   type CreateRoomResult,
   type InterServerEvents,
+  type LocalNetworkAddress,
   type JoinRoomResult,
   type ReconnectControllerResult,
   type ServerToClientEvents,
   type SocketData,
 } from "@party-game/shared";
+import { discoverLocalNetworkAddresses } from "./network-address.js";
 import { RoomManager } from "./room-manager.js";
 
 export interface RealtimeServerOptions {
   roomManager?: RoomManager;
+  getNetworkAddresses?: () => LocalNetworkAddress[];
 }
 
 const notAuthorizedToCreate: CreateRoomResult = {
@@ -50,6 +54,14 @@ const notAuthorizedToReconnect: ReconnectControllerResult = {
   },
 };
 
+const notAuthorizedToReadNetworkAddresses = {
+  ok: false,
+  error: {
+    code: "not_authorized",
+    message: "Only a host can request local network addresses.",
+  },
+} as const;
+
 export const createRealtimeServer = (
   httpServer: HttpServer,
   options: RealtimeServerOptions = {},
@@ -68,6 +80,8 @@ export const createRealtimeServer = (
   });
 
   const roomManager = options.roomManager ?? new RoomManager();
+  const getNetworkAddresses =
+    options.getNetworkAddresses ?? discoverLocalNetworkAddresses;
 
   roomManager.subscribe((event) => {
     if (event.type === "room-updated") {
@@ -103,6 +117,24 @@ export const createRealtimeServer = (
         return;
       }
       acknowledge(roomManager.createRoom(socket.id));
+    });
+
+    socket.on(HOST_GET_NETWORK_ADDRESSES_EVENT, (acknowledge) => {
+      if (typeof acknowledge !== "function") {
+        return;
+      }
+      if (socket.data.role !== CONNECTION_ROLES.host) {
+        acknowledge(notAuthorizedToReadNetworkAddresses);
+        return;
+      }
+
+      let addresses: LocalNetworkAddress[] = [];
+      try {
+        addresses = getNetworkAddresses();
+      } catch {
+        // Address discovery is optional prototype infrastructure. Manual joining remains available.
+      }
+      acknowledge({ ok: true, addresses });
     });
 
     socket.on(CONTROLLER_JOIN_ROOM_EVENT, (request, acknowledge) => {

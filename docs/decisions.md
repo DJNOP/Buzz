@@ -82,3 +82,14 @@ Keep one authoritative in-memory room model in the server process. Each host own
 Controllers receive a 256-bit random base64url reconnection token stored in local browser storage. The token restores the same player after reload or a brief interruption, but it is not authentication, is never exposed in public room state or logs, and is invalidated by player expiry, host disconnection, or server restart. Do not add JWTs, sessions, Redis, a database, or accounts for this prototype mechanism.
 
 Derive trusted player and room identity from the joined socket for every input. The five-button protocol uses neutral semantic button identifiers plus `down`/`up`; visual colour, symbol, and label choices remain configurable frontend presentation and unresolved product design.
+
+## D-010 — Local QR joining and provisional address selection
+
+- **Date:** 2026-08-02
+- **Status:** Provisional, implemented for Milestone 6
+
+Generate controller QR codes entirely in the host browser with `qrcode.react` 4.2.0. This focused renderer has built-in TypeScript declarations and no runtime dependencies. Use an unmodified high-contrast SVG with a four-module quiet margin; do not use an external QR service or embed a logo/overlay.
+
+The QR value contains only an HTTP controller URL, selected local IPv4 address, fixed development controller port, and room code. It never includes the private reconnection token. Manual code entry remains a first-class fallback, and the server continues to validate all room joins.
+
+Discover candidate IPv4 addresses in the Node.js server rather than attempting unreliable browser discovery. Exclude internal and unusable entries, prefer common private ranges deterministically, return alternatives to the host, and allow manual user selection when several candidates exist. Do not classify adapters by brittle Wi-Fi/Ethernet/VPN name matching or alter network/firewall settings. This is provisional local-development infrastructure, not internet routing or production service discovery.
