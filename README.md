@@ -1,35 +1,44 @@
 # Local Multiplayer Party Game
 
-> Working project description; the final game name and branding are intentionally unresolved.
+> Working project description; the final game name and branding remain unresolved.
 
-This repository is the foundation for an original shared-screen local multiplayer party game. Two to four players will use phone browsers as simple controllers while the main game runs in a desktop browser connected to a television or other shared display.
+This repository contains an original shared-screen local multiplayer party-game prototype. Two to four players use phone browsers as simple controllers while the host runs in a desktop browser connected to a television or other shared display.
 
-The game is intended to deliver short, accessible, competitive minigames that are family-friendly and still entertaining for adults playing with friends. It is neither specifically a children's game nor a drinking game. Alcohol is outside the product's branding, rules, scoring, and initial gameplay.
+The product is intended to be family-friendly and still entertaining for adults with friends. It is neither specifically a children's game nor a drinking game. Alcohol is outside the product's branding, rules, scoring, and initial gameplay.
 
 ## Current state
 
-The repository now contains the first end-to-end technical slice: one controller browser connects to one host browser through a local Socket.IO server, and one primary-button press creates immediate geometric feedback on the host. The host shows a press count and receipt timestamps for diagnostics.
+Roadmap Milestones 1–5 are implemented:
 
-The implementation and automated/local smoke validation for Roadmap Milestones 1 and 2 are complete. A real phone-on-private-network test still needs to be performed before treating those milestones as fully validated or starting the five-button milestone.
+- A real phone has successfully connected over local Wi-Fi and produced exactly one low-latency host event per deliberate primary-button press, including rapid presses.
+- A host can create one temporary four-character room code.
+- Two to four distinctly identified controllers can join the room.
+- Each controller has one large primary action and four smaller labelled secondary controls.
+- Every control sends typed `down` and `up` phases to only its own room's host.
+- The host shows four player slots, connection state, latest input, valid-phase count, and diagnostic receipt time.
+- Full rooms, invalid joins, duplicate names, disconnects, temporary reconnection, grace expiry, and host room closure are handled.
+
+The current interface remains a technical visualizer. It contains no minigame, scoring, tournament flow, artwork, QR joining, matchmaking, accounts, database, or cloud service.
 
 ## Repository layout
 
 ```text
 apps/
-  controller/   React/Vite phone controller
-  host/         React/Vite shared-screen host
-  server/       Node.js/Socket.IO real-time server
+  controller/   React/Vite join flow and five-button phone controller
+  host/         React/Vite room and player diagnostic display
+  server/       Node.js/Socket.IO transport and in-memory room authority
 packages/
-  shared/       Typed Socket.IO events and runtime payload validation
+  shared/       Typed room, player, session, and input protocol
 scripts/
-  dev.mjs       Minimal multi-process development launcher
+  dev.mjs                    Minimal multi-process development launcher
+  smoke-multiplayer.mjs      Reproducible multiplayer smoke scenario
 ```
 
-The root uses npm workspaces. No monorepo orchestration framework is required.
+The root uses native npm workspaces without a monorepo orchestration framework.
 
 ## Install and validate
 
-The installed Vite version requires Node.js `^20.19.0` or `>=22.12.0`. This prototype was created with Node.js `v24.15.0`, npm `11.12.1`, and Git `2.47.1.windows.1`.
+The installed Vite version requires Node.js `^20.19.0` or `>=22.12.0`. The project was most recently validated with Node.js `v24.15.0` and npm `11.12.1`.
 
 On Windows PowerShell, use `npm.cmd` because the machine's execution policy may block the `npm.ps1` launcher:
 
@@ -40,58 +49,79 @@ npm.cmd test
 npm.cmd run build
 ```
 
-No formatter or linter is included at this milestone; the current checks are TypeScript, Vitest, production builds, and the manual smoke path below.
+No formatter or linter is included. The current quality gates are strict TypeScript compilation, Vitest unit/integration tests, production builds, source-safety checks, and the smoke scenario.
 
 ## Run on the local network
 
-1. Connect the computer and phone to the same trusted private Wi-Fi or wired network.
-2. In PowerShell at the repository root, determine the computer's local address:
+1. Connect the computer and controllers to the same trusted private Wi-Fi or wired network.
+2. In PowerShell at the repository root, run:
 
    ```powershell
    ipconfig
    ```
 
-   Under the active **Wireless LAN adapter Wi-Fi** or **Ethernet adapter**, note the `IPv4 Address`, such as `<computer-ip>`. Ignore disconnected, VPN, virtual-machine, and loopback adapters.
-
-3. Start all three development processes:
+3. Under the active **Wireless LAN adapter Wi-Fi** or **Ethernet adapter**, note the `IPv4 Address`. Ignore disconnected, VPN, virtual-machine, and loopback adapters.
+4. Start the server and both browser applications:
 
    ```powershell
    npm.cmd run dev
    ```
 
-4. On the computer, open the host at [http://localhost:5173](http://localhost:5173).
-5. On the phone, open `http://<computer-ip>:5174`, replacing `<computer-ip>` with the address from `ipconfig`.
-6. Wait until both pages say they are connected, then press the phone's large **Press** button. The host shape should flash, the counter should increase by exactly one, and both receipt times should update.
-7. Stop the development processes with `Ctrl+C` in PowerShell.
+5. Open the host on the computer at [http://localhost:5173](http://localhost:5173), then select **Create room**.
+6. On each controller device or isolated browser context, open `http://<computer-ip>:5174` and enter the host's code plus a unique short display name.
+7. Stop the development stack with `Ctrl+C` when testing is finished.
 
-Both browser clients derive the Socket.IO server address from the hostname used to open the page and port `3001`; no current machine IP is stored in the code.
+The host, controller, and server use ports `5173`, `5174`, and `3001`. Browser clients derive the server hostname from the page URL, so no current machine IP is stored in source.
 
-Windows Defender Firewall may ask whether Node.js can accept connections. If prompted, allow it only on **Private networks**. Do not enable Public-network access for this prototype. If the prompt was previously denied, open **Windows Security → Firewall & network protection → Allow an app through firewall**, choose **Change settings**, and allow **Node.js JavaScript Runtime** on Private networks. The project does not alter firewall rules automatically.
+Windows Defender Firewall did not block the first successful real-phone test. On another machine or network, Windows may ask whether Node.js can accept connections; allow it only on **Private networks**. The project never changes firewall settings automatically.
 
-Some guest, corporate, or public Wi-Fi networks isolate devices even when they share a network name. Use a trusted home/private network if the phone cannot reach the controller URL.
+## Automated multiplayer smoke test
 
-Screen Wake Lock is deferred for this slice. Keep the controller screen awake manually during the test; controller input continues to work without a wake-lock API.
+With `npm.cmd run dev` already running in one PowerShell window, run this in a second window:
+
+```powershell
+npm.cmd run smoke
+```
+
+The scenario checks both browser pages, two room creations, two controllers in one room, all five buttons with paired phases, invalid-room rejection, four-player capacity, fifth-player rejection, cross-room isolation, controller replacement/reconnection, and host-triggered room closure.
+
+## Manual multiplayer test
+
+Use a combination of physical phones, different browsers, normal windows, and private/incognito windows. Each browser storage context represents one controller. Multiple normal tabs in the same browser profile share the same reconnection token, so use an incognito/private window, another browser profile, or another device for each additional simulated player.
+
+1. Create a room on the host and confirm four empty numbered slots appear.
+2. Join Player 1 from a phone using a unique display name.
+3. Join Players 2–4 from other phones or isolated browser contexts.
+4. Confirm every slot shows player number, name, accent marker, and connected state.
+5. Attempt a fifth join and confirm the controller sees a friendly full-room message.
+6. On every controller, press and hold each control, then release it. Confirm the host reports one `down` and one `up`, the correct semantic button, and the correct player.
+7. Try simultaneous and rapid presses on different controllers. Confirm events stay in their room and counts remain consistent.
+8. Reload one controller or briefly disable its network. The host should show it as disconnected, then restore the same number, name, accent, and player ID when it reconnects within 20 seconds.
+9. Disconnect a controller for more than 20 seconds. Confirm its slot becomes empty and a new controller can use the freed number.
+10. Close or reload the host. Connected controllers should be told that the room closed and return to the join screen; host reconnection is deliberately unsupported.
+
+The reconnection token is a random, private prototype capability stored in that browser's local storage. It is not an account, authentication system, or durable session. Rooms and tokens disappear whenever the server restarts.
+
+Screen Wake Lock remains deferred. Keep phone screens awake manually during longer tests.
 
 ## MVP direction
 
-- A shared host experience runs in a desktop browser and can be shown on a television through HDMI, casting, or another normal display connection.
-- Two to four players join in their phone browsers; no phone application installation is required.
-- Players eventually join by QR code or a short room code.
-- The first controller has one large primary action button and four smaller coloured buttons.
-- The first several prototypes use this standard five-button controller.
-- A simple tournament or cup links several minigames, each generally understandable within seconds and lasting about 30–90 seconds.
-- The first prototype works on a local network and has no rooms, persistent identities, database, accounts, matchmaking, payments, analytics, advertising, or cloud infrastructure.
+- The shared display remains the centre of attention; phone information stays minimal.
+- The standard controller uses semantic identifiers `primary`, `secondary1`, `secondary2`, `secondary3`, and `secondary4`.
+- Button colours are presentation configuration, not protocol identity; every secondary control also has a visible number and label.
+- Player identity always includes player number and display name in addition to a temporary accent marker.
+- QR joining, minigames, game engines, accounts, online matchmaking, native applications, analytics, advertising, and cloud infrastructure remain deferred.
 
 ## Documentation
 
-- [Project status](PROJECT_STATUS.md) — current phase, milestone, next step, and known issues.
+- [Project status](PROJECT_STATUS.md) — current phase, completed milestones, next step, and known issues.
 - [Product](docs/product.md) — product vision, experience principles, MVP boundaries, and originality requirements.
-- [Architecture](docs/architecture.md) — provisional technical direction, boundaries, and communication model.
+- [Architecture](docs/architecture.md) — room authority, transport boundaries, reconnection, cleanup, and protocol behaviour.
 - [Roadmap](docs/roadmap.md) — ordered, evidence-driven milestones.
 - [Decisions](docs/decisions.md) — accepted constraints and provisional technical decisions.
 - [Open questions](docs/open-questions.md) — unresolved product, platform, accessibility, and production choices.
-- [Agent guidance](AGENTS.md) — repository working rules for Codex and other coding agents.
+- [Agent guidance](AGENTS.md) — repository working rules for coding agents.
 
 ## Originality
 
-The product must use original names, worlds, characters, assets, presentation, controller styling, and independently designed minigames. Existing game brands and their protected creative expression must not appear in or be copied by the product. Asset sources, licences, generation methods, and commercial usage rights must be documented before commercial release. See [docs/product.md](docs/product.md) and [docs/decisions.md](docs/decisions.md) for the durable requirements.
+The product must use original names, worlds, characters, assets, presentation, controller styling, and independently designed minigames. Existing game brands and their protected creative expression must not appear in or be copied by the product. The current controller uses temporary original styling and a two-by-two secondary layout; its final palette, shapes, arrangement, and terminology remain open product decisions.

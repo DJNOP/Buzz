@@ -11,7 +11,8 @@
     "dev": "node scripts/dev.mjs",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run build --workspace @party-game/shared && npm run test --workspaces --if-present",
-    "build": "npm run build --workspace @party-game/shared && npm run build --workspace @party-game/server && npm run build --workspace @party-game/host && npm run build --workspace @party-game/controller"
+    "build": "npm run build --workspace @party-game/shared && npm run build --workspace @party-game/server && npm run build --workspace @party-game/host && npm run build --workspace @party-game/controller",
+    "smoke": "node scripts/smoke-multiplayer.mjs"
   },
   "devDependencies": {
     "@types/node": "^26.1.2",

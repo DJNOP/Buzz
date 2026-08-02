@@ -2,89 +2,91 @@
 
 ## Status
 
-This document describes a working technical direction, not a permanent architecture. The early milestones exist to test its assumptions. Technology or boundaries may change when prototype evidence justifies a decision.
+This is an implemented but still provisional local-network architecture. The first real-phone input test passed, and the multiplayer room foundation is automated-test and local-smoke validated. Real multi-device controller ergonomics still need manual evaluation before expanding scope.
 
-## Implemented prototype system
+## Workspace boundaries
 
-The current npm-workspaces system is composed of:
+1. **Host (`apps/host`)** — React/Vite shared-screen room creation and four-slot diagnostics.
+2. **Controller (`apps/controller`)** — React/Vite join form, private reconnection storage, player identity, and five-button input capture.
+3. **Server (`apps/server`)** — Socket.IO transport plus the in-memory authoritative `RoomManager`.
+4. **Shared protocol (`packages/shared`)** — event names, acknowledgements, public room/player/session types, semantic buttons/phases, constants, normalization, and runtime validation.
 
-1. **Shared host interface (`apps/host`)** — React with Vite and TypeScript, rendering connection state, one geometric input visualizer, a valid-press counter, and receipt-time diagnostics.
-2. **Phone-controller interface (`apps/controller`)** — React with Vite and TypeScript, presenting one large primary button with pointer, keyboard, assistive-click, visual, and optional vibration feedback.
-3. **Real-time server (`apps/server`)** — Node.js with Socket.IO, validating a host/controller connection role and primary-button payload before forwarding the event to currently connected host sockets.
-4. **Shared protocol (`packages/shared`)** — Socket.IO event names, payload types, connection-role types, and runtime validation functions used by both clients and the server.
+There is no game-logic package because this milestone contains no game state, rules, scoring, or minigame.
 
-There is no core game-logic package yet because this slice contains no game, scoring, or authoritative game state. Add that boundary only when a playable-minigame milestone creates a concrete need.
+## Authoritative state
 
-## Current input flow
+`RoomManager` is the only authoritative source for:
 
-1. The host and controller independently connect to the same server and declare a transient role in the Socket.IO handshake.
-2. The server rejects connections with malformed or unsupported role data.
-3. One controller activation emits `controller:primary-button` with a numeric client timestamp.
-4. The server verifies the sender is a controller and validates the exact payload shape.
-5. The server creates `host:primary-button` with the controller timestamp and server receipt time, then emits it to every currently connected host socket.
-6. The host increments its local diagnostic count, records browser receipt time, and replays the shape animation.
+- room code and owning host socket;
+- player ID, number, normalized display name, and temporary accent;
+- current controller socket and connected/disconnected state;
+- private reconnection token and grace timer;
+- currently pressed semantic buttons;
+- per-player valid input count and latest accepted diagnostic input.
 
-No Socket.IO room, room code, player identity, persistent state, or game state exists. The transient set of host socket IDs is the only application state on the server.
+The host keeps a presentation copy of public room snapshots and applies ordered host-input events for immediate display. The controller stores only its private reconnection token and last room code in local storage. Neither browser can assign trusted player or room identity.
+
+## Room lifecycle
+
+1. A connected host requests one room.
+2. The server generates a four-character uppercase code from `ABCDEFGHJKLMNPQRSTUVWXYZ23456789`, retrying collisions up to a bounded limit.
+3. Controllers submit a normalized room code and server-validated 1–16 character display name.
+4. The server rejects malformed/nonexistent rooms, invalid or case-insensitive duplicate names, already-joined sockets, and capacity beyond four.
+5. The lowest free player number is assigned with a random UUID, semantic accent, and 256-bit random base64url reconnection token.
+6. Public room snapshots never contain reconnection tokens.
+7. When the host disconnects, all player timers and indexes are cleared, connected controllers receive a room-closed notice, and the room is removed immediately.
+
+Rooms, players, and tokens remain in memory because local rapid prototyping does not require persistence, cross-process coordination, accounts, or recovery after a server restart.
+
+## Controller reconnection
+
+- On disconnect, the server removes the socket association, clears active-button state, marks the player disconnected, and reserves the slot for 20 seconds.
+- A new Socket.IO connection may present the private token once to restore the same player ID, number, name, and accent.
+- Successful restoration cancels the expiry timer and atomically replaces any old socket mapping before the old socket is disconnected.
+- Invalid, expired, room-closed, or server-restart tokens are rejected with a user-facing message.
+- At grace expiry, the disconnected player and token are removed and the number becomes available.
+
+The token is a temporary bearer capability, not authentication. It is never logged, sent to a host, or exposed to other controllers.
+
+## Input protocol
+
+The network protocol uses semantic buttons:
+
+- `primary`
+- `secondary1`
+- `secondary2`
+- `secondary3`
+- `secondary4`
+
+Each input contains only button, `down`/`up` phase, and client timestamp. The server derives the player and room from its socket-to-player index, rejects malformed values, unjoined or removed sockets, host impersonation, repeated `down`, and unmatched `up`, then sends a host diagnostic event only to that room's host socket.
+
+Button colours, symbols, and labels are frontend presentation. Player accents are a separate identity marker, and number/name remain visible so neither buttons nor players rely on colour alone.
+
+The controller input tracker owns pointer IDs and active keyboard controls. It prevents compatibility-click duplicates, emits one paired `down`/`up`, releases on pointer cancellation/lost capture/blur/visibility loss, and supports keyboard or assistive activation where practical.
 
 ## Local-network addressing
 
-The server listens on `0.0.0.0:3001`. Both Vite development servers listen on all interfaces at fixed ports: host `5173`, controller `5174`. Each browser derives the server URL from `window.location.hostname` and port `3001`, with an optional `VITE_SERVER_URL` override for development. This supports both `localhost` and private IPv4 access without storing a machine-specific address.
+- Socket.IO server: `0.0.0.0:3001`
+- Host Vite server: `0.0.0.0:5173`
+- Controller Vite server: `0.0.0.0:5174`
 
-## Target interaction flow
+Both browsers derive the Socket.IO hostname from `window.location.hostname`, with an optional `VITE_SERVER_URL` development override. No machine-specific IP is committed.
 
-This is the intended direction across later roadmap milestones, not the required implementation for the first controller-to-host slice. Milestones 1 and 2 intentionally use one host, one controller, and one shared real-time channel without rooms, persistent player identities, scoring, or game state.
+## Cleanup and race handling
 
-1. The host creates a room through the desktop browser.
-2. Players join from phone browsers using a short room code or, in a later milestone, a QR code.
-3. The server assigns or maintains a unique player identity within the room.
-4. A phone sends a compact, typed button-input event.
-5. The server validates and routes the event to the correct room and host.
-6. Game logic interprets the input and updates authoritative state.
-7. The host renders immediate shared-screen feedback.
+- Room-code collisions are retried rather than assumed impossible.
+- Player IDs are checked across all active rooms; reconnection-token collisions are retried.
+- Every disconnected-player timer is cancelled on reconnection, host closure, or manager disposal.
+- Late timer callbacks safely no-op if their room/player no longer exists or reconnected.
+- Reconnection removes the previous socket index before the previous socket is disconnected, so its late disconnect/input cannot evict or impersonate the restored session.
+- Disconnected slots count toward four-player capacity until expiry.
 
-The authority model for game state remains unresolved because this slice has no game state. The implemented input event contract is intentionally narrow and should be extended only when a later milestone requires another event.
+## Validation coverage
 
-## Responsibility boundaries
+Automated coverage includes room creation/code format/collisions, join/name/capacity rules, stable numbering, token secrecy, disconnect/reconnect/expiry, host closure, paired input state, malformed/unjoined/removed/host input rejection, cross-room isolation, pointer cancellation/focus loss, and compile-time shared contracts.
 
-| Area | Owns | Must not own |
-| --- | --- | --- |
-| Host frontend | Shared-screen connection state, input visualization, local diagnostics | Network validation, phone UI, scoring, or game rules |
-| Controller frontend | Connection state, accessible input capture, immediate local feedback | Authoritative scoring, shared game state, or host presentation |
-| Server | Connection roles, runtime input validation, transient host tracking, event forwarding | Rooms, persistent identity, game state, or visual presentation |
-| Shared protocol | Cross-process event names, payload types, shared identifiers | React components or transport side effects |
-| Future core game logic | Rules, state transitions, scoring logic when a minigame requires them | Browser rendering or Socket.IO connections |
+The reproducible smoke scenario verifies both browser pages plus two rooms, multiple controllers, all five paired controls, invalid/full joins, isolation, replacement reconnection, and host-triggered closure.
 
-These boundaries should keep core rules from becoming unnecessarily coupled to the initial browser host, leaving open the possibility of another host client later.
+## Deliberately deferred
 
-## Initial operational scope
-
-- Local-network operation first.
-- Two to four players is the initial product target; the first connection and input-loop milestones validate only one controller and one host.
-- No database in the first prototype; state is ephemeral.
-- No authentication or user accounts.
-- No online matchmaking.
-- No native mobile or smart-TV application.
-- No payments, analytics, advertising, or cloud infrastructure.
-- No dedicated game engine until controller-to-host communication has been validated.
-
-## Quality concerns for early validation
-
-- Input latency and visible acknowledgement.
-- Duplicate or malformed input handling.
-- Phone ergonomics, touch behaviour, viewport handling, and accessibility.
-- Clear separation between protocol, transport, game rules, and rendering.
-- Automated tests at stable boundaries, especially protocol and game rules.
-
-Room isolation, maximum capacity, persistent player identity, disconnection, and reconnection behaviour belong to later roadmap milestones and should not be introduced during the first input-loop slice.
-
-Security, internet deployment, persistence, scaling, and production observability are intentionally deferred until the product requires them. Local-network operation still requires basic validation of client-provided events and safe handling of unexpected input.
-
-## Current validation coverage
-
-- TypeScript compilation checks all four workspaces and includes compile-time shared-event contract assertions.
-- Socket.IO integration tests cover valid forwarding, malformed and unsupported input, and repeated controller connections.
-- A controller unit test protects the pointer/click deduplication decision.
-- Production builds verify the shared package, server output, and both Vite applications.
-- A same-computer smoke test verified both browser pages, the Socket.IO handshake, and a live forwarded primary-button event.
-
-A real phone and private network are still required to validate firewall behaviour, touch ergonomics, vibration support, and real-world latency.
+QR joining, host reconnection, durable storage, accounts/authentication, matchmaking, internet hosting/security, native apps, smart-TV apps, game engines, scoring, tournament flow, minigames, artwork, analytics, advertising, and deployment remain outside this foundation.

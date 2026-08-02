@@ -2,17 +2,58 @@ import type { Server as HttpServer } from "node:http";
 import { Server } from "socket.io";
 import {
   CONNECTION_ROLES,
-  HOST_PRIMARY_BUTTON_EVENT,
-  PRIMARY_BUTTON_EVENT,
+  CONTROLLER_INPUT_EVENT,
+  CONTROLLER_JOIN_ROOM_EVENT,
+  CONTROLLER_RECONNECT_EVENT,
+  CONTROLLER_ROOM_CLOSED_EVENT,
+  HOST_CREATE_ROOM_EVENT,
+  HOST_PLAYER_INPUT_EVENT,
+  HOST_ROOM_STATE_EVENT,
   isConnectionAuth,
-  isPrimaryButtonPayload,
+  isJoinRoomRequest,
+  isReconnectControllerRequest,
   type ClientToServerEvents,
+  type CreateRoomResult,
   type InterServerEvents,
+  type JoinRoomResult,
+  type ReconnectControllerResult,
   type ServerToClientEvents,
   type SocketData,
 } from "@party-game/shared";
+import { RoomManager } from "./room-manager.js";
 
-export const createRealtimeServer = (httpServer: HttpServer) => {
+export interface RealtimeServerOptions {
+  roomManager?: RoomManager;
+}
+
+const notAuthorizedToCreate: CreateRoomResult = {
+  ok: false,
+  error: {
+    code: "not_authorized",
+    message: "Only a host can create a room.",
+  },
+};
+
+const notAuthorizedToJoin: JoinRoomResult = {
+  ok: false,
+  error: {
+    code: "not_authorized",
+    message: "Only a controller can join a room.",
+  },
+};
+
+const notAuthorizedToReconnect: ReconnectControllerResult = {
+  ok: false,
+  error: {
+    code: "not_authorized",
+    message: "Only a controller can restore a player session.",
+  },
+};
+
+export const createRealtimeServer = (
+  httpServer: HttpServer,
+  options: RealtimeServerOptions = {},
+) => {
   const io = new Server<
     ClientToServerEvents,
     ServerToClientEvents,
@@ -26,7 +67,24 @@ export const createRealtimeServer = (httpServer: HttpServer) => {
     serveClient: false,
   });
 
-  const hostSocketIds = new Set<string>();
+  const roomManager = options.roomManager ?? new RoomManager();
+
+  roomManager.subscribe((event) => {
+    if (event.type === "room-updated") {
+      io.sockets.sockets
+        .get(event.hostSocketId)
+        ?.emit(HOST_ROOM_STATE_EVENT, event.room);
+      return;
+    }
+
+    for (const socketId of event.controllerSocketIds) {
+      io.sockets.sockets.get(socketId)?.emit(CONTROLLER_ROOM_CLOSED_EVENT, {
+        roomCode: event.roomCode,
+        reason: "host_disconnected",
+        message: "The host disconnected, so the room has closed.",
+      });
+    }
+  });
 
   io.on("connection", (socket) => {
     if (!isConnectionAuth(socket.handshake.auth)) {
@@ -36,34 +94,88 @@ export const createRealtimeServer = (httpServer: HttpServer) => {
 
     socket.data.role = socket.handshake.auth.role;
 
-    if (socket.data.role === CONNECTION_ROLES.host) {
-      hostSocketIds.add(socket.id);
-    }
+    socket.on(HOST_CREATE_ROOM_EVENT, (acknowledge) => {
+      if (typeof acknowledge !== "function") {
+        return;
+      }
+      if (socket.data.role !== CONNECTION_ROLES.host) {
+        acknowledge(notAuthorizedToCreate);
+        return;
+      }
+      acknowledge(roomManager.createRoom(socket.id));
+    });
 
-    socket.on(PRIMARY_BUTTON_EVENT, (payload) => {
-      if (
-        socket.data.role !== CONNECTION_ROLES.controller ||
-        !isPrimaryButtonPayload(payload)
-      ) {
+    socket.on(CONTROLLER_JOIN_ROOM_EVENT, (request, acknowledge) => {
+      if (typeof acknowledge !== "function") {
+        return;
+      }
+      if (socket.data.role !== CONNECTION_ROLES.controller) {
+        acknowledge(notAuthorizedToJoin);
+        return;
+      }
+      if (!isJoinRoomRequest(request)) {
+        acknowledge({
+          ok: false,
+          error: {
+            code: "invalid_room_code",
+            message: "Check the room code and display name, then try again.",
+          },
+        });
+        return;
+      }
+      acknowledge(roomManager.joinRoom(socket.id, request));
+    });
+
+    socket.on(CONTROLLER_RECONNECT_EVENT, (request, acknowledge) => {
+      if (typeof acknowledge !== "function") {
+        return;
+      }
+      if (socket.data.role !== CONNECTION_ROLES.controller) {
+        acknowledge(notAuthorizedToReconnect);
+        return;
+      }
+      if (!isReconnectControllerRequest(request)) {
+        acknowledge({
+          ok: false,
+          error: {
+            code: "invalid_reconnection_token",
+            message: "The previous player session is not valid.",
+          },
+        });
         return;
       }
 
-      const event = {
-        controllerPressedAt: payload.pressedAt,
-        serverReceivedAt: Date.now(),
-      };
-
-      for (const hostSocketId of hostSocketIds) {
-        io.sockets.sockets
-          .get(hostSocketId)
-          ?.emit(HOST_PRIMARY_BUTTON_EVENT, event);
+      const outcome = roomManager.reconnectController(
+        socket.id,
+        request.reconnectionToken,
+      );
+      if (
+        outcome.result.ok &&
+        outcome.replacedSocketId &&
+        outcome.replacedSocketId !== socket.id
+      ) {
+        io.sockets.sockets.get(outcome.replacedSocketId)?.disconnect(true);
       }
+      acknowledge(outcome.result);
+    });
+
+    socket.on(CONTROLLER_INPUT_EVENT, (payload) => {
+      if (socket.data.role !== CONNECTION_ROLES.controller) {
+        return;
+      }
+      const accepted = roomManager.acceptInput(socket.id, payload);
+      if (!accepted) {
+        return;
+      }
+      io.sockets.sockets
+        .get(accepted.hostSocketId)
+        ?.emit(HOST_PLAYER_INPUT_EVENT, accepted.event);
     });
 
     socket.on("disconnect", () => {
-      hostSocketIds.delete(socket.id);
+      roomManager.handleDisconnect(socket.id);
     });
   });
 
-  return io;
+  return { io, roomManager };
 };

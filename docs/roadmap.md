@@ -19,7 +19,10 @@ The roadmap is deliberately sequential. Complete and evaluate each milestone bef
 ## Current position
 
 - **Milestone 0:** Complete and committed.
-- **Milestone 1:** Implementation, automated checks, and same-computer smoke validation complete; real phone-browser validation pending.
-- **Milestone 2:** Implementation, automated checks, and live Socket.IO smoke validation complete; real phone input/latency validation pending.
+- **Milestone 1:** Complete; a real phone connected successfully over local Wi-Fi.
+- **Milestone 2:** Complete; deliberate and rapid real-phone primary presses produced exactly one low-latency host event each.
+- **Milestone 3:** Complete; all five semantic buttons emit paired typed phases with duplicate/stuck-input protections.
+- **Milestone 4:** Complete; hosts create isolated rooms for up to four distinctly identified players.
+- **Milestone 5:** Complete; capacity, disconnection, 20-second controller reconnection, cleanup, and core automated tests are implemented and validated.
 
-Do not begin Milestone 3 until the private-network phone test has been completed and Milestones 1 and 2 have been approved.
+Milestone 6 (QR-code joining) has not started. Conduct the documented manual multi-controller test and review this foundation before beginning it.
