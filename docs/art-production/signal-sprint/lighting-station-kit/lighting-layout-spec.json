@@ -1,0 +1,98 @@
+﻿{
+    "version":  1,
+    "status":  "provisional-greybox",
+    "canvas":  {
+                   "width":  320,
+                   "height":  240,
+                   "fourPlayerScale":  1,
+                   "onePlayerScale":  2
+               },
+    "provisionalBounds":  {
+                              "monitorContent":  {
+                                                     "x":  175,
+                                                     "y":  45,
+                                                     "width":  110,
+                                                     "height":  60
+                                                 },
+                              "stationControlSurface":  {
+                                                            "x":  55,
+                                                            "y":  138,
+                                                            "width":  230,
+                                                            "height":  42
+                                                        },
+                              "stationFront":  {
+                                                   "x":  45,
+                                                   "y":  175,
+                                                   "width":  250,
+                                                   "height":  45
+                                               }
+                          },
+    "provisionalAnchors":  {
+                               "feet":  {
+                                            "x":  105,
+                                            "y":  190
+                                        },
+                               "torso":  {
+                                             "x":  105,
+                                             "y":  143
+                                         },
+                               "head":  {
+                                            "x":  105,
+                                            "y":  98
+                                        },
+                               "workingHand":  {
+                                                   "x":  136,
+                                                   "y":  148
+                                               },
+                               "redContact":  {
+                                                  "x":  136,
+                                                  "y":  158
+                                              },
+                               "stageEffectOrigin":  {
+                                                         "x":  270,
+                                                         "y":  35
+                                                     }
+                           },
+    "controls":  {
+                     "primary":  {
+                                     "x":  75,
+                                     "y":  162,
+                                     "radius":  18
+                                 },
+                     "secondary":  [
+                                       {
+                                           "id":  1,
+                                           "colour":  "red",
+                                           "x":  125,
+                                           "y":  149,
+                                           "width":  22,
+                                           "height":  19
+                                       },
+                                       {
+                                           "id":  2,
+                                           "colour":  "blue",
+                                           "x":  160,
+                                           "y":  149,
+                                           "width":  22,
+                                           "height":  19
+                                       },
+                                       {
+                                           "id":  3,
+                                           "colour":  "yellow",
+                                           "x":  195,
+                                           "y":  149,
+                                           "width":  22,
+                                           "height":  19
+                                       },
+                                       {
+                                           "id":  4,
+                                           "colour":  "green",
+                                           "x":  230,
+                                           "y":  149,
+                                           "width":  22,
+                                           "height":  19
+                                       }
+                                   ]
+                 },
+    "note":  "All coordinates must be revised after the contact greybox is visually approved."
+}
