@@ -36,8 +36,17 @@ Roadmap Milestones 1–7 and a provisional themed presentation slice are impleme
   placeholders. Each robot operates a desk-mounted independent cue while the
   slot-mapped station changes its own part of the central stage: lighting,
   speaker signals, venue dressing, or curtains/backdrop/platform.
+- Lighting now serves as the provisional interaction-diorama standard. Its
+  layered bay keeps the dynamic cue, one large A control, four smaller numbered
+  controls, robot, physical contact point, console foreground, local feedback,
+  and authoritative stage-lighting consequence in one coherent workstation.
+  A dedicated provisional three-quarter robot workset keeps its working hand
+  registered to the physical console in work, contact, wrong, and stunned
+  presentation at both one- and four-player sizes.
+  Sound, decorations/event setup, and machinery are intentionally unchanged.
 - The repository-owned CSS robot and station remain the intentional
-  working/losing and image-load fallback. Set
+  image-load fallback; the existing approved winning sequence remains shared
+  in results. Set
   `VITE_SIGNAL_SPRINT_PIXELLAB_SPRITES=false` at build or dev startup to use
   that fallback for every generated state.
 - The host acknowledges every accepted server-received controller down, while
@@ -86,7 +95,7 @@ npm.cmd run build
 ```
 
 No formatter or linter is included. The current quality gates are strict
-TypeScript compilation, 74 Vitest unit/integration tests, production builds,
+TypeScript compilation, 112 Vitest unit/integration tests, production builds,
 source-safety checks, browser QA, and the smoke scenario.
 
 The host uses `qrcode.react` 4.2.0, a focused zero-dependency React renderer with built-in TypeScript declarations. It renders the join QR locally as SVG; no room code, URL, or other data is sent to a QR service.

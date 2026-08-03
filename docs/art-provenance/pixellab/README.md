@@ -52,7 +52,39 @@ reproduced without retaining unselected service outputs.
 Winning raw frames 4 and 5 introduced forbidden star eyes. An eye-only
 `inpaint_image` repair (job `3c8a87cd-e101-443c-a088-da342dffb5ea`, seed
 `6805`) produced selected frame 4 without changing pixels outside its mask;
-raw frame 5 was excluded. Working and losing intentionally remain CSS-only.
+raw frame 5 was excluded. Working and losing outside the focused Lighting
+station intentionally remain CSS-only.
+
+## Selected Lighting workset
+
+The revised Lighting interaction diorama uses a dedicated provisional
+three-quarter robot workset. PixelLab MCP `create_character` v3 used the exact
+approved neutral master as its reference and created character
+`ad197fed-092a-4010-a68a-b31366ed8de3`; its selected south-east source is
+[`character-south-east.png`](source/robot-lighting/character-south-east.png).
+Four single-direction `animate_character` v3 jobs then supplied work idle,
+reach/contact, wrong recoil, and stunned hold. The existing approved winning
+animation remains mapped for results.
+
+| State | Animation group | Animation | Selected raw indices | Durations (ms) |
+| --- | --- | --- | --- | --- |
+| Work idle | `7db1ac00-7700-4b63-ae44-88c94a234f98` | `affc56d9-57c0-43f9-8639-b1b42dcf8173` | `0, 2, 3, 0` | `260, 220, 240, 280` |
+| Reach/contact | `c4da4fff-82b4-4312-bf8b-3ff142618252` | `cb67845c-433c-4f2d-a33e-873311ca5167` | `0, 1, 2, 3` | `90, 110, 150, 210` |
+| Wrong recoil | `6c41b3a7-4f73-4df7-a666-a356021fb971` | `bbbd4fd5-10a5-4ef1-966a-55a3bfe65300` | `0, 1, 2, 3` | `90, 110, 140, 180` |
+| Stunned hold | `07aa1df3-2b8b-4e5b-90cf-8f9a10571b76` | `91898783-3873-4170-b516-d693a39d45d8` | `0, 1, 2, 3` | `130, 150, 170, 210` |
+
+The generated 136x136 frames were cropped consistently by `(20, 16, 116,
+112)` to the established 96x96 runtime canvas. All 16 selected frames have hard
+alpha and share floor pixel y=84. Normalized head, torso, working-hand, and feet
+anchors are recorded in the manifest. Two detached reaction symbols outside
+the stunned robot silhouette were removed with the exact rectangles recorded
+there; no robot pixels were repainted. Raw/rejected service output remains only
+under ignored `temp/pixellab/`.
+
+The balance moved from 1,423 remaining / 577 used to 1,413 remaining / 587
+used: exactly 10 subscription generations, with no credit spend. This workset
+is accepted only for the provisional Lighting interaction proof, not as final
+commercial character art or approval to upgrade the other stations.
 
 ## Accepted light-rig family
 
@@ -137,6 +169,21 @@ views for the distinct-station composition:
 - [`distinct-stations-four-player-1280x720.png`](qa/distinct-stations-four-player-1280x720.png)
 - [`distinct-stations-results-1280x720.png`](qa/distinct-stations-results-1280x720.png)
 - [`distinct-stations-joint-results-1920x1080.png`](qa/distinct-stations-joint-results-1920x1080.png)
+- [`lighting-diorama-revised-one-player-work-idle-1920x1080.png`](qa/lighting-diorama-revised-one-player-work-idle-1920x1080.png)
+- [`lighting-diorama-revised-one-player-contact-correct-1920x1080.png`](qa/lighting-diorama-revised-one-player-contact-correct-1920x1080.png)
+- [`lighting-diorama-revised-one-player-wrong-reaction-1920x1080.png`](qa/lighting-diorama-revised-one-player-wrong-reaction-1920x1080.png)
+- [`lighting-diorama-revised-one-player-stunned-hold-1920x1080.png`](qa/lighting-diorama-revised-one-player-stunned-hold-1920x1080.png)
+- [`lighting-diorama-revised-one-player-partial-progress-1920x1080.png`](qa/lighting-diorama-revised-one-player-partial-progress-1920x1080.png)
+- [`lighting-diorama-revised-one-player-complete-1920x1080.png`](qa/lighting-diorama-revised-one-player-complete-1920x1080.png)
+- [`lighting-diorama-revised-one-player-results-1920x1080.png`](qa/lighting-diorama-revised-one-player-results-1920x1080.png)
+- [`lighting-diorama-revised-four-player-active-1280x720.png`](qa/lighting-diorama-revised-four-player-active-1280x720.png)
+- [`lighting-diorama-revised-four-player-contact-1280x720.png`](qa/lighting-diorama-revised-four-player-contact-1280x720.png)
+- [`lighting-diorama-revised-four-player-mixed-progress-1280x720.png`](qa/lighting-diorama-revised-four-player-mixed-progress-1280x720.png)
+- [`lighting-diorama-revised-four-player-stunned-1280x720.png`](qa/lighting-diorama-revised-four-player-stunned-1280x720.png)
+- [`lighting-diorama-revised-four-player-results-1280x720.png`](qa/lighting-diorama-revised-four-player-results-1280x720.png)
+- [`lighting-diorama-revised-fallback-one-player-contact-1920x1080.png`](qa/lighting-diorama-revised-fallback-one-player-contact-1920x1080.png)
+- [`lighting-diorama-revised-fallback-one-player-stunned-1920x1080.png`](qa/lighting-diorama-revised-fallback-one-player-stunned-1920x1080.png)
+- [`lighting-diorama-revised-fallback-four-player-mixed-progress-1280x720.png`](qa/lighting-diorama-revised-fallback-four-player-mixed-progress-1280x720.png)
 
 Browser QA additionally covered one-, two-, three-, and four-player occupancy;
 independent mixed progress; idle, correct, wrong, stunned, working fallback, and
@@ -145,6 +192,15 @@ clean host/controller consoles; and zero document overflow. The 600 ms stun was
 observed authoritatively, but browser screenshot latency made the retained
 wrong-input frame land after the transient state cleared, so the earlier
 dedicated stunned proof remains the durable visual record for that state.
+
+The revised Lighting evidence covers work idle, physical contact/correct,
+wrong, stunned, partial progress, complete, and results at a true 1920x1080
+embedded viewport; active, contact, mixed progress, stunned, and results at
+native 1280x720 four-player size; and both one- and four-player CSS fallback.
+Every active route retained one integrated target monitor and no detached
+status card, with zero document overflow. The generated working-hand anchor was
+within 15 pixels of the physical console contact in one-player presentation and
+18 pixels in four-player presentation.
 
 ## Retention policy
 

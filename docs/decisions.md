@@ -223,3 +223,34 @@ playtest material, not final product roles or production art. This change adds
 no game engine, networking architecture, scoring difference, or difficulty
 difference. Physical multiplayer evidence must decide which roles and art
 direction are worth retaining.
+
+## D-016 — Lighting-first interaction diorama standard
+
+- **Date:** 2026-08-03
+- **Status:** Provisional, implemented for interaction and composition validation
+
+Use P1 Lighting as the first focused interaction-diorama standard before
+upgrading the other three stations. Compose it from explicit React/CSS layers:
+bay background, station back, robot, overlapping station front, dynamic target,
+local effects, foreground controls, and the existing shared stage-lighting
+system. Keep the target semantic and dynamic. Represent the controller as one
+dominant A control plus four grouped numbered controls; host controls remain
+non-interactive environmental feedback.
+
+Map only existing authoritative robot presentation states into Lighting work
+idle, acknowledgement/reach, contact/positive, wrong reaction, stunned hold,
+recovery, and complete feedback. CSS animation may express phases inside those
+trusted windows but must never delay input, predict correctness, extend stun,
+or override game state. Keep player colour/shape badges as runtime overlays and
+register head, torso, feet, working hand, and console contact as stable
+presentation anchors.
+
+Reuse accepted robot and station assets where they remain compositionally fit.
+Lighting live work, contact, wrong, and stunned presentation may use one bounded
+provisional three-quarter sprite workset derived from the exact approved neutral
+master; results continue to reuse the accepted winning sequence. Preserve
+runtime colour/shape identity, record every selected frame and cleanup, and keep
+CSS as the feature-flag and image-load fallback. Add no scene engine, canvas,
+protocol field, game-rule change, or audio subsystem. Sound, Decorations/event
+setup, and Machinery remain deferred until physical multiplayer testing
+validates this standard.

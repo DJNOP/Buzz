@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "recordedOn": "2026-08-03",
   "status": "Temporary prototype production-pipeline proof; not final commercial artwork.",
   "runtimeRoot": "apps/host/public/assets/pixellab",
@@ -137,6 +137,97 @@
       }
     }
   },
+  "lightingRobotWorkset": {
+    "status": "Selected provisional Lighting interaction sprites; not final commercial artwork.",
+    "method": "PixelLab MCP create_character v3 in reference mode from the exact approved neutral master, followed by four single-direction animate_character v3 jobs.",
+    "characterId": "ad197fed-092a-4010-a68a-b31366ed8de3",
+    "characterGroupId": "5b8ae082-e446-4645-bd9a-3b2e770421dc",
+    "direction": "south-east",
+    "reference": "docs/art-provenance/pixellab/source/prototype-service-robot-master-v1.png",
+    "selectedCharacterSource": {
+      "path": "docs/art-provenance/pixellab/source/robot-lighting/character-south-east.png",
+      "dimensions": [136, 136],
+      "alphaBoundingBox": [47, 35, 88, 101],
+      "sha256": "D1262A3C1D761BAB2DC29F6629F2F6B474B0C958EF4DC9B447B0C48DC4E15164"
+    },
+    "runtimeDimensions": [96, 96],
+    "runtimeCropFromGeneratedCanvas": [20, 16, 116, 112],
+    "anchorsPercent": {
+      "head": [52, 41],
+      "torso": [52, 67],
+      "workingHand": [81, 63],
+      "feet": [52, 88]
+    },
+    "generationUsage": {
+      "before": { "generationsRemaining": 1423, "generationsUsed": 577 },
+      "after": { "generationsRemaining": 1413, "generationsUsed": 587 },
+      "generationsUsed": 10,
+      "creditsBeforeUsd": 0,
+      "creditsAfterUsd": 0
+    },
+    "states": {
+      "work-idle": {
+        "animationGroupId": "7db1ac00-7700-4b63-ae44-88c94a234f98",
+        "animationId": "affc56d9-57c0-43f9-8639-b1b42dcf8173",
+        "motionBrief": "Settle into a three-quarter work pose with the right hand poised over the console, face visible, and feet planted.",
+        "selectedRawIndices": [0, 2, 3, 0],
+        "frameDurationsMs": [260, 220, 240, 280],
+        "alphaBoundingBoxes": [[27, 18, 73, 85], [26, 22, 76, 85], [26, 22, 76, 85], [27, 18, 73, 85]],
+        "animation": "apps/host/public/assets/pixellab/robot-lighting/work-idle/work-idle.png",
+        "animationSha256": "31F36367E627B1E92DCA4CDC6649DAA930E449A29FBDB80CF49B6A81D80BB35D",
+        "spriteSheet": "apps/host/public/assets/pixellab/robot-lighting/work-idle/work-idle-sprite-sheet.png",
+        "spriteSheetSha256": "6DE62F655CA913587E1A286B41D314486BA0F648EE32D0B2864BC7E8693B5E9A"
+      },
+      "reach-contact": {
+        "animationGroupId": "c4da4fff-82b4-4312-bf8b-3ff142618252",
+        "animationId": "cb67845c-433c-4f2d-a33e-873311ca5167",
+        "motionBrief": "Lean and extend the right hand to make clear physical contact with a nearby console control while keeping the face readable.",
+        "selectedRawIndices": [0, 1, 2, 3],
+        "frameDurationsMs": [90, 110, 150, 210],
+        "alphaBoundingBoxes": [[24, 15, 77, 85], [22, 19, 78, 85], [22, 22, 78, 85], [22, 22, 78, 85]],
+        "animation": "apps/host/public/assets/pixellab/robot-lighting/reach-contact/reach-contact.png",
+        "animationSha256": "C9CC96B2A044F147087B14A22E0925BD14DC2FA06CE60F1064F79EA9F9A377AE",
+        "spriteSheet": "apps/host/public/assets/pixellab/robot-lighting/reach-contact/reach-contact-sprite-sheet.png",
+        "spriteSheetSha256": "91F9D1B116A0CA4CE59C6AF40908B2491E07A26132CC91D49437B299CF121A3F"
+      },
+      "wrong-recoil": {
+        "animationGroupId": "6c41b3a7-4f73-4df7-a666-a356021fb971",
+        "animationId": "bbbd4fd5-10a5-4ef1-966a-55a3bfe65300",
+        "motionBrief": "Recoil from the console with a sharp wrong-input reaction while remaining planted at the workstation.",
+        "selectedRawIndices": [0, 1, 2, 3],
+        "frameDurationsMs": [90, 110, 140, 180],
+        "alphaBoundingBoxes": [[25, 20, 75, 85], [24, 19, 76, 85], [29, 18, 77, 85], [31, 19, 78, 85]],
+        "animation": "apps/host/public/assets/pixellab/robot-lighting/wrong-recoil/wrong-recoil.png",
+        "animationSha256": "F6642FDAE0480F0C78235A82304278E6FCA311D8E761839BFC5C7DF1AE5EBD4D",
+        "spriteSheet": "apps/host/public/assets/pixellab/robot-lighting/wrong-recoil/wrong-recoil-sprite-sheet.png",
+        "spriteSheetSha256": "83F6A8848E7E2D9B448947B42EB737DFFF60B55BDAF37C9F1CF7C9AB833D0498"
+      },
+      "stunned-hold": {
+        "animationGroupId": "07aa1df3-2b8b-4e5b-90cf-8f9a10571b76",
+        "animationId": "91898783-3873-4170-b516-d693a39d45d8",
+        "motionBrief": "Slump into a readable stunned hold with disabled eyes and hands withdrawn from the controls.",
+        "selectedRawIndices": [0, 1, 2, 3],
+        "frameDurationsMs": [130, 150, 170, 210],
+        "alphaBoundingBoxes": [[27, 17, 73, 85], [23, 15, 75, 85], [26, 20, 75, 85], [29, 20, 75, 85]],
+        "cleanup": [
+          { "rawFrameIndex": 2, "clearedRectangle": [0, 48, 46, 88], "reason": "Removed a detached cyan reaction puff outside the robot silhouette." },
+          { "rawFrameIndex": 3, "clearedRectangle": [0, 54, 49, 104], "reason": "Removed a detached hallucinated symbol outside the robot silhouette." }
+        ],
+        "animation": "apps/host/public/assets/pixellab/robot-lighting/stunned-hold/stunned-hold.png",
+        "animationSha256": "15EFFB5C24707AD2F02B88A46228C9E8C14FB5AF5CB5A322FAA20E14B684824F",
+        "spriteSheet": "apps/host/public/assets/pixellab/robot-lighting/stunned-hold/stunned-hold-sprite-sheet.png",
+        "spriteSheetSha256": "549082F0DBA80B9D8B3BD45030DE66FD584E84B3937AA4A44ADFED84391A5E98"
+      }
+    },
+    "validation": {
+      "runtimeAnimations": 4,
+      "selectedFrames": 16,
+      "spriteSheets": 4,
+      "hardAlphaOnly": true,
+      "commonFloorPixelY": 84,
+      "winningReuse": "Existing approved winning animation remains mapped for results compatibility."
+    }
+  },
   "lightRig": {
     "dimensions": [128, 96],
     "baseJobId": "76fa1a27-8b7f-4f0d-8dbd-9393797a011e",
@@ -261,6 +352,21 @@
     "docs/art-provenance/pixellab/qa/distinct-stations-four-player-1920x1080.png",
     "docs/art-provenance/pixellab/qa/distinct-stations-four-player-1280x720.png",
     "docs/art-provenance/pixellab/qa/distinct-stations-results-1280x720.png",
-    "docs/art-provenance/pixellab/qa/distinct-stations-joint-results-1920x1080.png"
+    "docs/art-provenance/pixellab/qa/distinct-stations-joint-results-1920x1080.png",
+    "docs/art-provenance/pixellab/qa/lighting-diorama-revised-one-player-work-idle-1920x1080.png",
+    "docs/art-provenance/pixellab/qa/lighting-diorama-revised-one-player-contact-correct-1920x1080.png",
+    "docs/art-provenance/pixellab/qa/lighting-diorama-revised-one-player-wrong-reaction-1920x1080.png",
+    "docs/art-provenance/pixellab/qa/lighting-diorama-revised-one-player-stunned-hold-1920x1080.png",
+    "docs/art-provenance/pixellab/qa/lighting-diorama-revised-one-player-partial-progress-1920x1080.png",
+    "docs/art-provenance/pixellab/qa/lighting-diorama-revised-one-player-complete-1920x1080.png",
+    "docs/art-provenance/pixellab/qa/lighting-diorama-revised-one-player-results-1920x1080.png",
+    "docs/art-provenance/pixellab/qa/lighting-diorama-revised-four-player-active-1280x720.png",
+    "docs/art-provenance/pixellab/qa/lighting-diorama-revised-four-player-contact-1280x720.png",
+    "docs/art-provenance/pixellab/qa/lighting-diorama-revised-four-player-mixed-progress-1280x720.png",
+    "docs/art-provenance/pixellab/qa/lighting-diorama-revised-four-player-stunned-1280x720.png",
+    "docs/art-provenance/pixellab/qa/lighting-diorama-revised-four-player-results-1280x720.png",
+    "docs/art-provenance/pixellab/qa/lighting-diorama-revised-fallback-one-player-contact-1920x1080.png",
+    "docs/art-provenance/pixellab/qa/lighting-diorama-revised-fallback-one-player-stunned-1920x1080.png",
+    "docs/art-provenance/pixellab/qa/lighting-diorama-revised-fallback-four-player-mixed-progress-1280x720.png"
   ]
 }

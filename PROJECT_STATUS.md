@@ -1,24 +1,27 @@
 # Project Status
 
-- **Current phase:** Distinct-station Signal Sprint presentation validation
-- **Current milestone:** Roadmap Milestones 1–7 plus the provisional themed
-  four-station shared-venue composition implemented
-- **Last completed task:** Replaced the temporary all-lighting workstations with
-  slot-derived lighting, sound, decorations/event-setup, and stage-machinery
-  presentations, aligned four-state PixelLab props, independent venue effects,
-  CSS fallbacks, and station-aware results without changing game behaviour.
+- **Current phase:** Lighting interaction-diorama validation
+- **Current milestone:** Roadmap Milestones 1–7 plus a provisional Lighting-first
+  physical interaction standard inside the distinct four-station venue
+- **Last completed task:** Revised Lighting into one coherent physical
+  robot-console-target workstation, with a dedicated provisional three-quarter
+  workset, registered hand/contact geometry, integrated monitor/status,
+  authoritative correct/wrong/stun presentation, independent stage-lighting
+  consequences, reduced-motion information, and CSS fallback without changing
+  game behaviour or upgrading the other three stations.
 - **Next recommended task:** Run the documented physical social playtest with two
-  to four phones and a television. Review shared-stage readability, robot motion,
-  task clarity, target/identity separation, results, and the known CSS-only
-  `working`/`losing` art mismatch before approving more art or merging.
+  to four phones and a television. Review Lighting contact readability, target
+  hierarchy, reaction timing, badge placement, shared-stage consequence, and
+  coexistence with the intentionally unchanged stations before approving more
+  station art or interaction work.
 - **Date last updated:** 2026-08-03
 
 ## Validation summary
 
 The local-network room, five-button input, reconnection, QR-prefill, manual
 join, and Signal Sprint rule foundations remain intact. Strict type checking
-passes for every workspace. The suite now contains 98 passing automated tests:
-5 controller presentation/input tests, 33 host identity/station/presentation
+passes for every workspace. The suite now contains 112 passing automated tests:
+5 controller presentation/input tests, 47 host identity/station/presentation
 tests, 52 unchanged server tests, and 8 shared-protocol/query tests.
 
 The production build and live multiplayer smoke scenario pass. The smoke still
@@ -27,38 +30,47 @@ independent targets, correct/wrong input, the exact 600 ms authoritative stun,
 ignored stun input, the 15-point finish, replay, reconnection, room isolation,
 and host cleanup.
 
-The compact PixelLab proof now contains 54 transparent runtime PNGs, including
-16 distinct four-station states. Manifest paths and hashes, 128x96 station
-dimensions, hard alpha, unique station hashes, selected sources, both
-feature-flag build modes, and byte-identical build copies pass focused
-validation. Rejected and disposable generations remain untracked.
+The compact PixelLab proof now contains 78 transparent runtime PNGs, including
+16 distinct four-station states and 24 selected Lighting workset artifacts.
+Manifest paths and hashes, generated/runtime dimensions, hard alpha, stable
+floor registration, unique station hashes, selected sources, both feature-flag
+build modes, and byte-identical build copies pass focused validation. Rejected
+and disposable generations remain untracked.
 
-The approved 96x96 R02 structural source and neutral master, six selected robot
-animation sequences, four 128x96 light-rig states, twelve new 128x96 station
-states, job IDs, seeds, frame
-selections, masks, and alignment decisions remain reproducible. Selected frames
-and sprite sheets live with runtime assets; durable sources and the consolidated
-audit record live in `docs/art-provenance/pixellab/`. Disposable PixelLab work is
-narrowly ignored at `temp/pixellab/`.
+The approved 96x96 R02 structural source and neutral master, six general robot
+animation sequences, four dedicated Lighting sequences, four 128x96 light-rig
+states, twelve 128x96 station states, job IDs, seeds, frame selections, crops,
+cleanup rectangles, masks, hashes, and alignment decisions remain reproducible.
+The Lighting pass used exactly 10 subscription generations (1,423 to 1,413
+remaining) and no credits. Selected frames and sprite sheets live with runtime
+assets; durable sources and the consolidated audit record live in
+`docs/art-provenance/pixellab/`. Disposable PixelLab work is narrowly ignored
+at `temp/pixellab/`.
 
-In-app browser QA covered one-, two-, three-, and four-player active layouts at
-1280x720; one- and four-player active layouts, independent mixed progress, and
-joint-winner results at 1920x1080; and results at both scales. Every measured
-view had zero document overflow and no clipped workstation, cue, station prop,
-or robot bounds. An authoritative wrong input and resulting misroute were
-observed; the 600 ms stun cleared before the new screenshot completed, so the
-existing dedicated stunned proof remains the retained visual record. Computed
-identity accents remained red, blue, yellow, and green while targets retained
-their independent semantic tone. Direct host and controller console logs were
-free of warnings and errors.
+In-app browser QA for this revision covered work idle, contact/correct, wrong,
+stunned, partial progress, complete, and results at a true 1920x1080 embedded
+one-player viewport; active, contact, mixed progress, stunned, and results at
+native 1280x720 four-player size; and representative one- and four-player
+PixelLab-disabled fallback. The cue and status stayed inside one physical
+monitor, the console overlapped the robot, the torso badge remained
+runtime-rendered, and Lighting retained an equal four-player footprint. Every
+active route had exactly one integrated target, no detached status card, and
+zero document overflow. The generated working-hand anchor stayed within 15 px
+of the console contact in one-player presentation and 18 px at four-player
+size. This browser surface did not expose a console-message reader, so semantic
+DOM checks plus clean typecheck, tests, builds, and smoke validation remain the
+available diagnostics for this pass.
 
-The generated-asset path still covers idle, correct, wrong, stunned, working CSS
-fallback, winning, and all 16 station-state mappings. Completed winner stations
+The generated-asset path covers dedicated Lighting work idle, reach/contact,
+wrong recoil, stunned hold, the shared winning sequence, and all 16
+station-state mappings; CSS remains the build-time and image-load fallback.
+Completed winner stations
 and their station-specific venue consequences remain visible in results.
 Controller content has no document overflow at exact 390×844, 360×800, or
 390×667 measurements and keeps the complete A plus 1–4 stack visible in active,
-stunned, lobby, and results states. Direct host and controller consoles were
-free of errors and warnings. Temporary viewport QA wrappers were removed.
+stunned, lobby, and results states. Prior direct host and controller console
+evidence remains clean. The development-only full-HD capture frame is isolated
+from production builds and does not change gameplay or network state.
 
 ## Current presentation and architecture
 
@@ -82,6 +94,18 @@ columns, and four remain readable in one row at 1280×720. Countdown and results
 reuse the same venue; winners receive prominent robots while every player keeps
 jobs, mistakes, identity, and winning/losing state in the secondary scoreboard.
 
+Lighting alone now branches into a focused `LightingInteractionDiorama`. Its
+explicit visual layers preserve background-to-foreground depth, place a
+three-quarter robot physically behind the stepped console, mount the dynamic
+accessible cue and status inside one monitor, and align the working hand with a
+real console contact. Stable head, torso, working-hand, feet, and
+station-contact anchors register the runtime badge and contact treatment.
+Authoritative presentation
+states select neutral, acknowledged, positive, warning, locked, recovery, or
+complete feedback; animation never supplies gameplay authority. Existing
+Lighting progress still maps independently to broken, partial, nearly
+operational, and complete venue illumination.
+
 A small pure host presentation module consumes trusted server-received down
 events for acknowledgement and authoritative game snapshots for correct,
 wrong, stun, working, and result states. Time-derived transient windows prevent
@@ -92,8 +116,11 @@ asset module. The host overlays the existing recolourable shape on the blank
 robot chest rather than baking player variants into generated art.
 
 Robot `idle`, input acknowledgement, correct, wrong, stunned, and winning use
-animated PNGs. Working and losing intentionally use the preserved CSS robot;
-image load errors also fall back to CSS. Each occupied slot owns one visually
+animated PNGs. Lighting maps its live states to the dedicated work-idle,
+reach/contact, wrong-recoil, and stunned-hold workset while reusing the approved
+winning sequence in results. Working elsewhere and losing intentionally use
+the preserved CSS robot; image load errors also fall back to CSS. Each occupied
+slot owns one visually
 distinct event-production station: P1 lighting, P2 sound, P3 decorations/event
 setup, and P4 stage machinery. All use the same score-driven broken, partial,
 nearly operational, and complete states, but independently affect fixtures,
@@ -118,12 +145,13 @@ comfort, accessibility with real players, perceived latency with four phones, or
 a desire for another round.
 
 The approved source and generation record remain reviewable under
-`docs/art-provenance/pixellab/`; the supplied design reference remains under
-`docs/art-references/`. Runtime copies are loaded from
+`docs/art-provenance/pixellab/`; the two user-approved direction references and
+their interpretation live under `docs/design-references/signal-sprint/` and are
+not runtime assets. Runtime copies are loaded from
 `apps/host/public/assets/pixellab/` by the reversible presentation path. The CSS
-working/losing robot is visibly taller
-and stylistically different from the PixelLab master; resolving that mismatch
-requires a later human-approved art milestone. No new dependency, audio,
+working/losing robot outside Lighting is visibly taller and stylistically
+different from the PixelLab master; resolving that mismatch requires a later
+human-approved art milestone. No new dependency, audio,
 animation engine, generic minigame framework, tournament flow, persistence,
 hosting, or deployment was introduced. Final name, identity, commercial
 character art, accessibility standards, distribution, monetisation, engine

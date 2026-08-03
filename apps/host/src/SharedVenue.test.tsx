@@ -7,6 +7,7 @@ import {
 } from "@party-game/shared";
 import type { RobotPresentation } from "./robot-presentation";
 import { SharedVenue } from "./SharedVenue";
+import { LIGHTING_ROBOT_SPRITE_ASSETS } from "./sprite-assets";
 import { getVenueStationSystems } from "./station-presentation";
 import { StationTargetDisplay } from "./StationTargetDisplay";
 
@@ -49,6 +50,22 @@ const renderVenue = (playerCount: number) =>
       )}
       scoreToWin={15}
       getPresentation={() => presentation}
+    />,
+  );
+
+const renderLightingState = (
+  state: RobotPresentation["state"],
+  overrides: Partial<SignalSprintPlayer> = {},
+) =>
+  renderToStaticMarkup(
+    <SharedVenue
+      players={[player(1, overrides)]}
+      scoreToWin={15}
+      getPresentation={() => ({
+        ...presentation,
+        state,
+        label: state,
+      })}
     />,
   );
 
@@ -95,6 +112,33 @@ describe("shared Signal Sprint venue", () => {
     expect(markup).not.toContain("placeholder");
   });
 
+  it("renders the focused Lighting workstation as explicit depth layers", () => {
+    const markup = renderVenue(1);
+
+    for (const layer of [
+      "lighting-bay-background",
+      "station-back",
+      "robot",
+      "station-front",
+      "dynamic-target-monitor",
+      "local-station-effects",
+      "foreground-props",
+    ]) {
+      expect(markup).toContain(`data-layer="${layer}"`);
+    }
+    expect(markup).toContain('data-lighting-state="broken"');
+  });
+
+  it("represents one dominant primary and four grouped secondary controls", () => {
+    const markup = renderVenue(1);
+
+    expect(markup.match(/lighting-control--primary/g)).toHaveLength(1);
+    expect(markup.match(/lighting-control--secondary/g)).toHaveLength(4);
+    for (const target of CONTROLLER_BUTTONS) {
+      expect(markup).toContain(`data-button="${target}"`);
+    }
+  });
+
   it("attaches an independent semantic target to every workstation", () => {
     const markup = renderVenue(4);
     for (const target of targets) {
@@ -131,6 +175,65 @@ describe("shared Signal Sprint venue", () => {
     expect(markup).toContain('data-tone="blue"');
   });
 
+  it("keeps the target dynamic, redundant, and accessible inside Lighting", () => {
+    const markup = renderLightingState("working", { target: "secondary3" });
+
+    expect(markup).toContain('data-target-monitor="integrated"');
+    expect(markup).toContain("lighting-monitor-housing");
+    expect(markup).toContain('data-target="secondary3"');
+    expect(markup).toContain('data-tone="yellow"');
+    expect(markup).toContain('aria-label="Current target 3 Yellow"');
+    expect(markup).toContain(">secondary3</small>");
+    expect(markup).not.toContain("lighting-detached-target-card");
+    expect(markup).not.toContain("lighting-interaction-status");
+  });
+
+  it("maps active Lighting states to dedicated work-capable robot material", () => {
+    expect(LIGHTING_ROBOT_SPRITE_ASSETS.idle?.name).toBe("work-idle");
+    expect(LIGHTING_ROBOT_SPRITE_ASSETS.working?.name).toBe("work-idle");
+    expect(LIGHTING_ROBOT_SPRITE_ASSETS.inputAcknowledgement?.name).toBe(
+      "reach-contact",
+    );
+    expect(LIGHTING_ROBOT_SPRITE_ASSETS.correct?.name).toBe("reach-contact");
+    expect(LIGHTING_ROBOT_SPRITE_ASSETS.wrong?.name).toBe("wrong-recoil");
+    expect(LIGHTING_ROBOT_SPRITE_ASSETS.stunned?.name).toBe("stunned-hold");
+  });
+
+  it("attaches runtime identity and stable anchors to the Lighting robot", () => {
+    const markup = renderVenue(1);
+
+    expect(markup).toContain('data-presentation-anchor="head"');
+    expect(markup).toContain('data-presentation-anchor="torso"');
+    expect(markup).toContain('data-presentation-anchor="working-hand"');
+    expect(markup).toContain('data-presentation-anchor="feet"');
+    expect(markup).toContain('data-presentation-anchor="station-contact"');
+    expect(markup).toContain("identity-mark--circle");
+    expect(markup).toContain("--robot-anchor-torso-x");
+    expect(markup).toContain("--robot-anchor-hand-y");
+  });
+
+  it("selects positive feedback only from an authoritative correct presentation", () => {
+    const markup = renderLightingState("correct");
+
+    expect(markup).toContain('data-interaction-phase="contact"');
+    expect(markup).toContain('data-feedback-tone="positive"');
+    expect(markup).toContain('data-lighting-feedback="correct"');
+    expect(markup).toContain("Lighting cue confirmed");
+  });
+
+  it("distinguishes immediate wrong feedback from authoritative stun lockout", () => {
+    const wrongMarkup = renderLightingState("wrong");
+    const stunnedMarkup = renderLightingState("stunned", { stunnedUntil: 900 });
+
+    expect(wrongMarkup).toContain('data-interaction-phase="wrongReaction"');
+    expect(wrongMarkup).toContain('data-feedback-tone="warning"');
+    expect(wrongMarkup).toContain('data-controls-locked="false"');
+    expect(stunnedMarkup).toContain('data-interaction-phase="stunnedHold"');
+    expect(stunnedMarkup).toContain('data-feedback-tone="locked"');
+    expect(stunnedMarkup).toContain('data-controls-locked="true"');
+    expect(stunnedMarkup).toContain("Lighting controls locked");
+  });
+
   it("maps every player's score to only that player's station", () => {
     const systems = getVenueStationSystems(
       [
@@ -147,6 +250,25 @@ describe("shared Signal Sprint venue", () => {
       "partial",
       "nearlyOperational",
       "complete",
+    ]);
+  });
+
+  it("does not complete another station when Lighting completes", () => {
+    const systems = getVenueStationSystems(
+      [
+        player(1, { score: 15 }),
+        player(2, { score: 1 }),
+        player(3, { score: 0 }),
+        player(4, { score: 10 }),
+      ],
+      15,
+    );
+
+    expect(systems.map(({ station, state }) => [station.type, state])).toEqual([
+      ["lighting", "complete"],
+      ["sound", "partial"],
+      ["decorations", "broken"],
+      ["machinery", "nearlyOperational"],
     ]);
   });
 

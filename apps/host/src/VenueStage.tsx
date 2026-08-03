@@ -1,4 +1,5 @@
 import type { SignalSprintPlayer } from "@party-game/shared";
+import type { RobotPresentationState } from "./robot-presentation";
 import {
   getStationSystemByType,
   getVenueStationSystems,
@@ -10,11 +11,13 @@ export const VenueStage = ({
   scoreToWin,
   celebration = false,
   completedPlayerIds = [],
+  lightingInteractionState,
 }: {
   players: readonly SignalSprintPlayer[];
   scoreToWin: number;
   celebration?: boolean;
   completedPlayerIds?: readonly string[];
+  lightingInteractionState?: RobotPresentationState | undefined;
 }) => {
   const systems = getVenueStationSystems(
     players,
@@ -33,6 +36,7 @@ export const VenueStage = ({
       data-sound-state={sound?.state}
       data-decorations-state={decorations?.state}
       data-machinery-state={machinery?.state}
+      data-lighting-feedback={lightingInteractionState}
       aria-label="Shared backstage event venue"
     >
       <div className="venue-back-wall" aria-hidden="true">
@@ -66,6 +70,9 @@ export const VenueStage = ({
         ) : null}
       </div>
       <VenueSystemsProgress systems={systems} />
+      <div className="venue-audience" aria-hidden="true">
+        {Array.from({ length: 18 }, (_, index) => <i key={index} />)}
+      </div>
       <div className="performance-stage" aria-hidden="true">
         <span className="performance-stage__screen">SIGNAL SPRINT</span>
         <span className="performance-stage__deck" />

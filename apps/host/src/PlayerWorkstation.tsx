@@ -1,4 +1,5 @@
 import type { SignalSprintPlayer } from "@party-game/shared";
+import { LightingInteractionDiorama } from "./LightingInteractionDiorama";
 import { getPlayerIdentity } from "./player-identity";
 import type { RobotPresentation } from "./robot-presentation";
 import { ServiceRobot } from "./ServiceRobot";
@@ -56,38 +57,49 @@ export const PlayerWorkstation = ({
         </div>
       </header>
 
-      <div className="workstation-bay">
-        <div className="robot-operating-position">
-          <StationProp type={stationType} state={stationState} />
-          <ServiceRobot identity={identity} presentation={presentation} />
-          <span className="robot-floor-shadow" aria-hidden="true" />
-        </div>
-
-        <div className="equipment-console">
-          <span
-            className="console-cable console-cable--input"
-            aria-hidden="true"
+      {stationType === "lighting" ? (
+        <div className="workstation-bay workstation-bay--lighting">
+          <LightingInteractionDiorama
+            player={player}
+            identity={identity}
+            presentation={presentation}
+            stationState={stationState}
           />
-          <StationTargetDisplay target={player.target} />
-          <div className="console-controls" aria-hidden="true">
-            <i /><i /><i />
-          </div>
-          <div className="console-status" role="status">
-            <strong>{presentation.label}</strong>
-            <span>
-              {player.mistakes} misroute
-              {player.mistakes === 1 ? "" : "s"}
-            </span>
-          </div>
         </div>
-
-        {presentation.state === "stunned" ? (
-          <div className="workstation-lockout" aria-hidden="true">
-            <i>!</i>
-            <span>Station locked</span>
+      ) : (
+        <div className="workstation-bay">
+          <div className="robot-operating-position">
+            <StationProp type={stationType} state={stationState} />
+            <ServiceRobot identity={identity} presentation={presentation} />
+            <span className="robot-floor-shadow" aria-hidden="true" />
           </div>
-        ) : null}
-      </div>
+
+          <div className="equipment-console">
+            <span
+              className="console-cable console-cable--input"
+              aria-hidden="true"
+            />
+            <StationTargetDisplay target={player.target} />
+            <div className="console-controls" aria-hidden="true">
+              <i /><i /><i />
+            </div>
+            <div className="console-status" role="status">
+              <strong>{presentation.label}</strong>
+              <span>
+                {player.mistakes} misroute
+                {player.mistakes === 1 ? "" : "s"}
+              </span>
+            </div>
+          </div>
+
+          {presentation.state === "stunned" ? (
+            <div className="workstation-lockout" aria-hidden="true">
+              <i>!</i>
+              <span>Station locked</span>
+            </div>
+          ) : null}
+        </div>
+      )}
 
       <footer className="workstation-deck">
         <div>
