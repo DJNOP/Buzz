@@ -223,3 +223,20 @@ playtest material, not final product roles or production art. This change adds
 no game engine, networking architecture, scoring difference, or difficulty
 difference. Physical multiplayer evidence must decide which roles and art
 direction are worth retaining.
+
+## D-016 — Gameplay validation before further visual investment
+
+- **Date:** 2026-09-17
+- **Status:** Accepted product-development principle
+
+Use a coherent, reusable prototype visual language that is pleasant and clear
+enough for meaningful playtests, but validate gameplay before investing further
+in bespoke production art, final characters, a broad asset pipeline, or a large
+design system. Presentation work must answer the current gameplay question and
+must not substitute for evidence that players enjoy the game and want another
+round.
+
+Retain the current Event Rescue, robot, station, PixelLab, Lighting-station, and
+unmerged diorama work as provisional evidence. Do not treat it as approved
+production direction or continue it by default. The physical two-to-four-player
+Signal Sprint playtest is the next decision gate.

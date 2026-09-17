@@ -86,7 +86,7 @@ npm.cmd run build
 ```
 
 No formatter or linter is included. The current quality gates are strict
-TypeScript compilation, 74 Vitest unit/integration tests, production builds,
+TypeScript compilation, 98 Vitest unit/integration tests, production builds,
 source-safety checks, browser QA, and the smoke scenario.
 
 The host uses `qrcode.react` 4.2.0, a focused zero-dependency React renderer with built-in TypeScript declarations. It renders the join QR locally as SVG; no room code, URL, or other data is sent to a QR service.
@@ -228,6 +228,7 @@ two-to-four-player playtest before adding another minigame or a tournament flow.
 - [Roadmap](docs/roadmap.md) — ordered, evidence-driven milestones.
 - [Decisions](docs/decisions.md) — accepted constraints and provisional technical decisions.
 - [Open questions](docs/open-questions.md) — unresolved product, platform, accessibility, and production choices.
+- [Game ideas](docs/game-ideas.md) — recovered gameplay concepts and their validation state.
 - [PixelLab provenance](docs/art-provenance/pixellab/README.md) — approved
   prototype sources, generation records, runtime locations, and retention policy.
 - [Agent guidance](AGENTS.md) — repository working rules for coding agents.

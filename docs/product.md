@@ -70,6 +70,18 @@ The following requirements are non-negotiable:
 
 Early prototypes should validate the controller-to-host loop before expanding scope: connection reliability, response latency, five-button ergonomics, accessibility, whether simple minigames work on a shared screen, and whether players genuinely want another round.
 
+## Prototype investment principle
+
+Gameplay validation takes priority over polished artwork. Prototypes should use
+a coherent, reusable visual language that looks good enough for meaningful
+playtesting while minimizing bespoke art investment until the game interaction
+has been validated. Existing Event Rescue, robot, station, and PixelLab work is
+provisional evidence; it must not delay or substitute for physical playtesting.
+
+Do not expand the art pipeline, build final characters, or create a large design
+system merely because a technical prototype exists. Add only the presentation
+needed to answer the current gameplay question.
+
 ## Provisional Event Rescue slice
 
 Signal Sprint currently stages the validation loop as an original event venue

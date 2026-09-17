@@ -24,9 +24,10 @@ The roadmap is deliberately sequential. Complete and evaluate each milestone bef
 - **Milestone 3:** Complete; all five semantic buttons emit paired typed phases with duplicate/stuck-input protections.
 - **Milestone 4:** Complete; hosts create isolated rooms for up to four distinctly identified players.
 - **Milestone 5:** Complete; capacity, disconnection, 20-second controller reconnection, cleanup, and core automated tests are implemented and validated.
-- **Milestone 6:** Complete; local QR generation, selectable detected addresses,
-  safe controller prefilling, manual fallback, and physical local joining are
-  implemented and validated.
+- **Milestone 6:** Technically complete; local QR generation, selectable
+  detected addresses, safe controller prefilling, manual fallback, and the
+  software joining flow are implemented and validated. A documented
+  real-camera QR acceptance test remains outstanding.
 - **Milestone 7:** Complete in implementation and technical validation. Signal
   Sprint provides one server-authoritative minigame with a lobby, countdown,
   30-second race, five-button targets, scoring, stuns, results, replay,
@@ -44,4 +45,6 @@ The next gate is Milestone 8: run the documented physical two-to-four-player
 Signal Sprint playtest. Technical correctness does not establish enjoyment,
 social clarity, TV readability with real players, controller ergonomics, or a
 desire for another round. Do not add a tournament, additional minigame, game
-engine, or production content before evaluating that evidence.
+engine, or further bespoke art/production content before evaluating that
+evidence. Existing Lighting-station pre-production and the unmerged Lighting
+diorama experiment should remain paused until that gate is complete.
