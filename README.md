@@ -91,6 +91,31 @@ source-safety checks, browser QA, and the smoke scenario.
 
 The host uses `qrcode.react` 4.2.0, a focused zero-dependency React renderer with built-in TypeScript declarations. It renders the join QR locally as SVG; no room code, URL, or other data is sent to a QR service.
 
+## Start Buzz
+
+On Windows, double-click `START_BUZZ.cmd` in the repository root. It starts the
+existing `npm.cmd run dev` stack in a dedicated development window, waits for
+the server, host, and controller ports, and opens the shared host at
+[http://localhost:5173](http://localhost:5173). It does not open a controller
+page; phones continue to join through the host's QR code or room code.
+
+If the same tracked Buzz session is already running, the launcher does not
+start a duplicate stack and simply opens the host page again.
+
+## Stop Buzz
+
+Double-click `STOP_BUZZ.cmd` in the repository root. It stops only the process
+tree recorded for the Buzz session started by `START_BUZZ.cmd`. It never kills
+Node or npm processes by image name. Temporary PID/session metadata is stored in
+the ignored `.buzz-runtime/` directory and stale state is removed safely.
+
+The launchers are optional conveniences. Terminal-based development remains
+supported with:
+
+```powershell
+npm.cmd run dev
+```
+
 ## Run on the local network
 
 1. Connect the computer and controllers to the same trusted private Wi-Fi or wired network.

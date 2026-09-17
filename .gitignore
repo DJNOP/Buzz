@@ -20,6 +20,7 @@ yarn-error.log*
 pnpm-debug.log*
 *.pid
 *.pid.lock
+.buzz-runtime/
 
 # Tool caches
 .cache/

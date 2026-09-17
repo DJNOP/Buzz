@@ -43,6 +43,8 @@ competitive, and replayable.
 - One focused server-authoritative Signal Sprint prototype.
 - Reversible CSS/PixelLab presentation proof with provenance records and
   retained browser-QA screenshots.
+- Windows start/stop launchers that wrap the canonical development command and
+  track only their dedicated Buzz process tree.
 
 ## Current work
 
