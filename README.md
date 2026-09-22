@@ -245,6 +245,42 @@ two-to-four-player playtest before adding another minigame or a tournament flow.
   accounts, matchmaking, native applications, analytics, advertising, and cloud
   infrastructure remain deferred.
 
+## Development workflow
+
+Start with the outcome agreed with Nicholas and the current repository records.
+Use [Project #4](https://github.com/users/DJNOP/projects/4) and existing relevant
+items; verify identity, association, and current status before updating them.
+Product ideas and the roadmap do not independently authorise implementation.
+
+1. Record the agreed outcome, scope, hard constraints, and acceptance evidence in
+   the relevant issue/item. Suggested implementation methods remain adaptable.
+2. Work through inspection, implementation, necessary supporting changes, focused
+   tests, rendered review, and ordinary corrections without repeated handoffs.
+   Use `In progress` for authorised active work; keep resumable progress in
+   `PROJECT_STATUS.md`.
+3. Deliver a validated candidate and draft PR with branch/commit, commands and
+   results, non-private evidence, limitations, and local test steps. Routine
+   branches, scoped commits, non-force feature-branch pushes, and linked tracking
+   updates are included unless the assignment is explicitly local-only.
+4. Nicholas reviews and accepts; integrate only when authorised. The board has
+   no review state: keep the existing active status and add a review-pending note
+   with the PR. Do not mark `Done` or close an item just because tests pass or a
+   draft exists. Do not add columns or enable automatic acceptance.
+
+For UI work, establish the player task and original social-game direction from
+the product/decision records. Reuse `START_BUZZ.cmd` / `STOP_BUZZ.cmd` and the
+documented validation/smoke flows. Exercise changed host and phone flows at
+relevant TV/desktop and phone sizes with synthetic names and no private evidence.
+Check applicable keyboard focus, readable non-colour identity, input feedback,
+loading, errors, selection/confirmation, results/replay, join/reconnect, and room
+isolation. Correct defects within the agreed outcome before delivery.
+
+Report builds/typechecks, behavioural tests, rendered visual review, and physical
+phone/TV/social playtesting separately. A browser screenshot does not establish
+phone comfort, QR-camera success, social comprehension, or desire to replay.
+Reuse suitable installed skills when relevant; no new design system or mandatory
+design skill is implied for every edit. Stop when the agreed outcome is delivered.
+
 ## Documentation
 
 - [Project status](PROJECT_STATUS.md) — current phase, completed milestones, next step, and known issues.
