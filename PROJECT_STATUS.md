@@ -120,3 +120,14 @@ minimizing production-art investment until the interaction is validated.
 - [Game ideas](docs/game-ideas.md) — gameplay inventory and validation state.
 - [PixelLab provenance](docs/art-provenance/pixellab/README.md) — temporary asset audit trail.
 - [Agent guidance](AGENTS.md) — repository working rules.
+
+## Workflow setup candidate — 2026-09-22
+
+Personal development guidance now records coherent work packages, ordinary corrections,
+routine GitHub delivery, review before acceptance/integration, and separate rendered and
+physical-playtest evidence. The repository fallback is Terra Medium; explicit task
+selection takes precedence. Diff/link review passed; no app or physical playtest was run
+for these documentation/configuration edits. This setup branch is a review candidate,
+not a change to the gameplay-validation gate or the active checkout's unpublished work.
+Next setup step: review the draft PR, authorise integration, and load the resulting
+checkout in a new task. Current product priorities above remain unchanged.
