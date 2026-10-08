@@ -131,3 +131,12 @@ for these documentation/configuration edits. This setup branch is a review candi
 not a change to the gameplay-validation gate or the active checkout's unpublished work.
 Next setup step: review the draft PR, authorise integration, and load the resulting
 checkout in a new task. Current product priorities above remain unchanged.
+
+## Workflow controls candidate — 2026-10-08
+
+Unmerged candidate on `codex/workflow-controls-20261008` (base `7c36425`): adds
+`.github/workflows/ci.yml` (clean-checkout `npm ci`, shared build, typecheck, tests,
+production build on Node 24; no new dependencies), removes the stale model/effort
+overrides from `.codex/config.toml` so user settings are inherited, and makes AGENTS
+startup reading selective. Not yet run on GitHub, reviewed, or accepted; product status
+and the gameplay-validation gate above are unchanged.
