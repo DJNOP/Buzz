@@ -1,6 +1,6 @@
 # Agent Instructions
 
-- Before substantial work, read `PROJECT_STATUS.md`, `docs/product.md`, `docs/architecture.md`, and `docs/decisions.md`.
+- Before substantial work, read `PROJECT_STATUS.md` (current status) and only the task-relevant docs among `docs/product.md`, `docs/architecture.md`, `docs/decisions.md`, `docs/roadmap.md`, and the README section for the area touched; do not read every document by default.
 - Inspect the actual branch/worktree, Git status, relevant files, and nested/override instructions before editing. Preserve unrelated and unpublished work; use an isolated branch/worktree when implementation is active.
 - Complete the agreed outcome as one coherent work package: inspect, implement, make necessary supporting changes, test, correct in-scope defects, and deliver reviewable evidence. Choose reversible implementation details independently; internal milestones do not need repeated prompts. Research-only requests remain research-only; do not add speculative features or later product milestones.
 - Prefer the simplest implementation that meets current acceptance criteria. Add no dependency without a clear current need.

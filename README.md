@@ -89,6 +89,8 @@ No formatter or linter is included. The current quality gates are strict
 TypeScript compilation, 98 Vitest unit/integration tests, production builds,
 source-safety checks, browser QA, and the smoke scenario.
 
+GitHub Actions (`.github/workflows/ci.yml`, job `validate`, Node 24) runs `npm ci`, the shared build, `npm run typecheck`, `npm test`, and `npm run build` on pull requests and pushes to `main`. CI covers only these automated gates; the smoke scenario, browser QA, and physical playtests remain manual.
+
 The host uses `qrcode.react` 4.2.0, a focused zero-dependency React renderer with built-in TypeScript declarations. It renders the join QR locally as SVG; no room code, URL, or other data is sent to a QR service.
 
 ## Start Buzz

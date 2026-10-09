@@ -121,7 +121,24 @@ minimizing production-art investment until the interaction is validated.
 - [PixelLab provenance](docs/art-provenance/pixellab/README.md) — temporary asset audit trail.
 - [Agent guidance](AGENTS.md) — repository working rules.
 
-## Workflow setup candidate — 2026-09-22
+## Current workflow behavior
+
+Current for this checkout (workflow PR [#2](https://github.com/DJNOP/Buzz/pull/2),
+branch `codex/workflow-controls-20261008`): agent startup reads `PROJECT_STATUS.md` and
+only the task-relevant documents; `.codex/config.toml` no longer overrides model or
+effort, so user settings apply; and `.github/workflows/ci.yml` (job `validate`: Node 24,
+`npm ci`, shared build, typecheck, tests, production build; read-only permissions) is a
+real workflow definition. Evidence: the exact-head review and a passing `validate` check
+on `f595fd7` were recorded on 2026-10-08. Current integration status comes from the PR
+and Git, not from this file. No rendered, smoke, or physical-playtest acceptance is
+implied; the product priorities and the gameplay-validation gate are unchanged.
+
+The two candidate blocks below are dated historical checkpoints. Their "unmerged",
+"not yet run on GitHub, reviewed", and "next setup step" wording described the state when
+they were written and is superseded by the note above. The "Terra Medium" fallback in the
+first block is also historical: the model override was removed.
+
+## Workflow setup candidate — 2026-09-22 (historical)
 
 Personal development guidance now records coherent work packages, ordinary corrections,
 routine GitHub delivery, review before acceptance/integration, and separate rendered and
@@ -131,3 +148,12 @@ for these documentation/configuration edits. This setup branch is a review candi
 not a change to the gameplay-validation gate or the active checkout's unpublished work.
 Next setup step: review the draft PR, authorise integration, and load the resulting
 checkout in a new task. Current product priorities above remain unchanged.
+
+## Workflow controls candidate — 2026-10-08 (historical checkpoint)
+
+Unmerged candidate on `codex/workflow-controls-20261008` (base `7c36425`): adds
+`.github/workflows/ci.yml` (clean-checkout `npm ci`, shared build, typecheck, tests,
+production build on Node 24; no new dependencies), removes the stale model/effort
+overrides from `.codex/config.toml` so user settings are inherited, and makes AGENTS
+startup reading selective. Not yet run on GitHub, reviewed, or accepted; product status
+and the gameplay-validation gate above are unchanged.
